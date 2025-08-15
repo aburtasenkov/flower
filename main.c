@@ -1,6 +1,7 @@
 #include "imageToAscii.h"
 
 #include <stdlib.h>
+#include <regex.h>
 
 #define ARGC_MIN 2
 #define IMAGE_PATH_ARGV_INDEX 1
@@ -27,6 +28,46 @@ void printImage(const char * filename, int blockSize) {
   printf("%s\n", asciiImage);
 
   stbi_image_free(image);
+  free(asciiImage);
+}
+
+char * filenameExtension(const char * filename) {
+  regex_t regex;
+  regmatch_t match[2];
+
+  int statusCode = regcomp(&regex, REGEX_FILE_EXTENSION_PATTERN, REG_EXTENDED);
+  if (statusCode != 0) {
+    char errorBuffer[128];
+    regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
+    printf("Regex compilation failed: %s... Aborting\n", errorBuffer);
+    return NULL;
+  }
+
+  statusCode = regexec(&regex, filename, 2, match, 0);
+  if (statusCode != 0) {
+    char errorBuffer[128];
+    regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
+    printf("Regex match failed: %s... Aborting\n", errorBuffer);
+    return NULL;
+  }
+
+  int start = match[1].rm_so;
+  int end = match[1].rm_eo;
+
+  int length = end - start;
+  char * extension = (char *)malloc(length + 1); // +1 for '\0'
+
+  if (!extension) {
+    printf("Error allocating memory for file extension. Aborting...\n");
+    return NULL;
+  }
+
+  memcpy(extension, filename + start, length);
+  extension[length] = '\0';
+
+  regfree(&regex);
+
+  return extension;
 }
 
 int main(int argc, char ** argv) {
@@ -38,6 +79,11 @@ int main(int argc, char ** argv) {
 
   // First argument is the path of the pic which will be generated into ascii characters
   char * filename = argv[IMAGE_PATH_ARGV_INDEX];
+  
+  char * fileExtension = filenameExtension(filename);
+  if (!fileExtension) return 1;
+
+  printf("File Extension: %s\n", filenameExtension(filename));
 
   // Second argument is size of blocksize
   // default: 1 --> 1 pixel = 1 character
@@ -53,6 +99,8 @@ int main(int argc, char ** argv) {
   /*-----------------------Loading done-----------------------*/
 
   printImage(filename, blockSize);
+
+  free(fileExtension);
 
   return 0;
 }
