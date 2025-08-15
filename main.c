@@ -13,7 +13,7 @@
 
 unsigned char grayscaleToChar(unsigned char grayScaleValue) {
   static const char const * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  static const int AsciiSize = 70;
+  static const int AsciiSize = 70; // size of Ascii Array
 
   // flatten [0:255] values on [0:69] ids
   unsigned char idx = AsciiSize - 1 - grayScaleValue * AsciiSize / UCHAR_MAX;
@@ -92,6 +92,10 @@ int main(int argc, char ** argv) {
   int blockSize;
   if (argc == ARGC_MIN) blockSize = 1;
   else blockSize = atoi(argv[BLOCKSIZE_ARGV_INDEX]); 
+  if (blockSize < 1) {
+    printf("Pre-condition: blockSize variable must be positive. Aborting...\n");
+    return 1;
+  }
 
   // Load image
   int width, height, Ncomponents;
