@@ -2,15 +2,22 @@
 
 #include <stdlib.h>
 #include <regex.h>
+#include <sys/wait.h>
 
 #define ARGC_MIN 2
 #define IMAGE_PATH_ARGV_INDEX 1
 #define BLOCKSIZE_ARGV_INDEX 2
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
-#define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%04d.png"
+#define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
 
-void printImage(const char * filename, int blockSize) {
+// TODO
+// PRE CONDITIONS FOR FUNCTIONS
+// POST CONDITIONS FOR ALL FUNCTIONS
+
+void printImage(const char * filename, int blockSize) 
+// convert image located at filename into ascii character array and print it out in terminal
+{
   // Load image
   int width, height, Ncomponents;
   unsigned char * image = stbi_load(filename, &width, &height, &Ncomponents, 0);
@@ -31,7 +38,9 @@ void printImage(const char * filename, int blockSize) {
   free(asciiImage);
 }
 
-char * filenameExtension(const char * filename) {
+char * filenameExtension(const char * filename)
+// return the file extension of filename variable
+{
   regex_t regex;
   regmatch_t match[2];
 
@@ -70,6 +79,76 @@ char * filenameExtension(const char * filename) {
   return extension;
 }
 
+int executeCommand(const char * command) 
+// Wrapper for system(*command*) calls in order to ease debugging
+{
+  if (command == NULL) {
+    printf("Pre-condition executeCommand(const char * command): command is null pointer\n");
+    return 1;
+  }
+
+  printf("Running command: %s\n", command);
+  int statusCode = system(command);
+
+  // check if system failed
+  if (statusCode == -1) {
+    printf("system(\"%s\") failed. Aborting...\n", command);
+    return 1;
+  }
+
+  // it exited normally --> check exit code
+  if (WIFEXITED(statusCode)) {
+    int exitCode = WEXITSTATUS(statusCode);
+
+    if (exitCode == 0) {
+      printf("\"%s\" ran successfully.\n", command);
+      return 0;
+    }
+
+    printf("\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
+    return exitCode;
+  }
+
+
+  // check for signal termination
+  if (WIFSIGNALED(statusCode)) {
+    int sig = WTERMSIG(statusCode);
+    printf("\"%s\" was terminated by signal %d.\n", command, sig);
+    return 128 + sig;  // common convention for signal termination
+  }
+
+  // all other non formal terminations
+  printf("system(\"%s\") did not terminate normally. Aborting...\n", command);
+  return 1;
+}
+
+void printVideo(const char * filename, int blockSize) 
+// convert a mp4 video into a sequence of frames in "frames" folder
+// and print them all out frame by frame in the terminal in ascii format
+{
+  if (filename == NULL) {
+    printf("Pre-condition void printVideo(const char * filename, int blockSize): filename is null pointer\n");
+    return;
+  }
+
+  size_t ffmpegCommandSize = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filename) + 1;
+  char * ffmpegCommand = (char *)malloc(ffmpegCommandSize);
+  if (ffmpegCommand == NULL) {
+    printf("Error allocating memory for ffmpegCommand in printVideo(const char * filename, int blockSize). Aborting...\n");
+    return;
+  }
+  snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filename);
+
+  if (executeCommand("mkdir frames") != 0) return;
+  if (executeCommand(ffmpegCommand) != 0) return;
+  if (executeCommand("clear") != 0) return; // NON PORTABLE COMMAND
+
+  // PRINTING FRAMES
+
+  if (executeCommand("rm -rf frames") != 0) return;
+  
+}
+
 int main(int argc, char ** argv) {
   /*-----------------------Load terminal input parameters-----------------------*/
   if (argc < ARGC_MIN) {
@@ -79,7 +158,7 @@ int main(int argc, char ** argv) {
 
   // First argument is the path of the pic which will be generated into ascii characters
   char * filename = argv[IMAGE_PATH_ARGV_INDEX];
-  
+
   char * fileExtension = filenameExtension(filename);
   if (!fileExtension) return 1;
 
@@ -98,7 +177,9 @@ int main(int argc, char ** argv) {
   
   /*-----------------------Loading done-----------------------*/
 
-  printImage(filename, blockSize);
+
+  if (strcmp(fileExtension, "png") == 0) printImage(filename, blockSize);
+  if (strcmp(fileExtension, "mp4") == 0) printVideo(filename, blockSize);
 
   free(fileExtension);
 
