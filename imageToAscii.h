@@ -17,7 +17,20 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) {
+unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
+// convert rgb value of a pixel to an ascii char
+// return ERROR_GRAYSCALE_VAL at error
+{
+  // pre conditions
+  if (pixel == NULL) {
+    printf("Pre-condition rgbToGrayscale(unsigned char * pixel, int Ncomponents): pixel is null pointer\n");
+    return ERROR_GRAYSCALE_VAL;
+  }
+  if (Ncomponents < 1 || Ncomponents > 4) {
+    printf("Pre-condition rgbToGrayscale(unsigned char * pixel, int Ncomponents): Ncomponents needs to be in range [1:4]\n");
+    return ERROR_GRAYSCALE_VAL;
+  }
+
   static const float RGB_FACTORS[] = {0.299f, 0.587f, 0.114f};
 
   unsigned char grayscale = 0;
@@ -37,7 +50,10 @@ unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) {
   return grayscale;
 }
 
-char * createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize) {
+char * createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
+// create array of ascii chars for output
+// returns NULL at error
+{
   int outWidth = width / blockSize;
   int outHeight = height / blockSize;
 
@@ -59,7 +75,13 @@ char * createAsciiImage(unsigned char * image, int width, int height, int Ncompo
       for (int y = 0; y < blockSize && (by + y) < height; ++y) {
         for (int x = 0; x < blockSize && (bx + x) < width; ++x) {
           unsigned char * currentPixel = image + ((by + y) * width + bx + x) * Ncomponents;
-          sum += rgbToGrayscale(currentPixel, Ncomponents);
+
+          unsigned char grayscaleValue = rgbToGrayscale(currentPixel, Ncomponents);
+          if (grayscaleValue == ERROR_GRAYSCALE_VAL) {
+            free(asciiImage);
+            return NULL;
+          }
+          sum += grayscaleValue;
           ++count;
         }
       }

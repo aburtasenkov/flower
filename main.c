@@ -18,6 +18,16 @@
 void printImage(const char * filename, int blockSize) 
 // convert image located at filename into ascii character array and print it out in terminal
 {
+  // pre-conditions
+  if (filename == NULL) {
+    printf("Pre-condition printImage(const char * filename, int blockSize): filename is null pointer\n");
+    return;
+  }
+  if (blockSize < 1) {
+    printf("Pre-condition printImage(const char * filename, int blockSize): blockSize is smaller than 1");
+    return;
+  }
+
   // Load image
   int width, height, Ncomponents;
   unsigned char * image = stbi_load(filename, &width, &height, &Ncomponents, 0);

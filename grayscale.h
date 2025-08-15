@@ -2,6 +2,8 @@
 
 #include <limits.h>
 
+#define ERROR_GRAYSCALE_VAL 'E'
+
 unsigned char grayscaleToChar(unsigned char grayScaleValue) {
   static const char const * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
   static const int AsciiSize = 70; // size of Ascii Array
