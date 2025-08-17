@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <cstring>
 
 #define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
 
@@ -54,6 +55,11 @@ void printVideo(const char * filename, int blockSize)
 {
   if (filename == NULL) {
     printf("Pre-condition void printVideo(const char * filename, int blockSize): filename is null pointer\n");
+    return;
+  }
+
+  if (blockSize < 1) {
+    printf("Pre-condition void printVideo(const char * filename, int blockSize): blockSize is smaller than 1");
     return;
   }
 
