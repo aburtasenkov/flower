@@ -1,10 +1,15 @@
 #pragma once
 
+#include "imageToAscii.h"
+
 #include <stdlib.h>
 #include <stdio.h>
-#include <cstring>
+#include <unistd.h>
+#include <stdbool.h>
 
 #define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
+// --> max amount of frames = 9999
+#define MAX_FRAMES 9999
 
 int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
@@ -49,6 +54,34 @@ int executeCommand(const char * command)
   return 1;
 }
 
+bool fileExists(const char * filename) {
+  if (filename == NULL) {
+    printf("Pre-condition fileExists(const char * filename): filename is null pointer\n");
+    return false;
+  }
+
+  if (access(filename, F_OK) == 0) {
+    return true;
+  }
+  return false;
+}
+
+void printFrames(int blockSize) {
+  if (blockSize < 1) {
+    printf("Pre-condition printFrames(int blockSize): blockSize is smaller than 1\n");
+    return;
+  }
+  char filepath[22];
+
+  // frames start at 0001
+  for (int i = 1; i <= MAX_FRAMES; ++i) {
+    snprintf(filepath, sizeof(filepath), "frames/frame_%04d.png", i);
+    if (!fileExists(filepath)) break;
+
+    printImage(filepath, blockSize);
+  }
+}
+
 void printVideo(const char * filename, int blockSize) 
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
@@ -75,8 +108,7 @@ void printVideo(const char * filename, int blockSize)
   if (executeCommand(ffmpegCommand) != 0) return;
   if (executeCommand("clear") != 0) return; // NON PORTABLE COMMAND
 
-  // PRINTING FRAMES
+  printFrames(blockSize);
 
   if (executeCommand("rm -rf frames") != 0) return;
-  
 }
