@@ -17,19 +17,15 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include <assert.h>
+
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
 // convert rgb value of a pixel to an ascii char
-// return ERROR_GRAYSCALE_VAL at error
 {
-  // pre conditions
-  if (pixel == NULL) {
-    printf("Pre-condition rgbToGrayscale(unsigned char * pixel, int Ncomponents): pixel is null pointer\n");
-    return ERROR_GRAYSCALE_VAL;
-  }
-  if (Ncomponents < 1 || Ncomponents > 4) {
-    printf("Pre-condition rgbToGrayscale(unsigned char * pixel, int Ncomponents): Ncomponents needs to be in range [1:4]\n");
-    return ERROR_GRAYSCALE_VAL;
-  }
+  // pixel not null pointer
+  assert(pixel != NULL);
+  // Ncomponents in range[1:4]
+  assert(Ncomponents > 0 && Ncomponents < 5);
 
   static const float RGB_FACTORS[] = {0.299f, 0.587f, 0.114f};
 
@@ -50,24 +46,25 @@ unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents)
   return grayscale;
 }
 
-char * createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
+char * createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
 // create array of ascii chars for output
 // returns NULL at error
 {
+  printf("Converting image %s into ascii grayscale array\n", filename);
   if (image == NULL) {
-    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): image is null pointer\n");
+    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): image is null pointer\n");
     return NULL;
   }
   if (width < 0 || height < 0) {
-    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): wrong image Dimensions (width or height are smaller than 1 pixel)\n");
+    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): wrong image Dimensions (width or height are smaller than 1 pixel)\n");
     return NULL;
   }
   if (Ncomponents < 1 || Ncomponents > 4) {
-    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): Ncomponents needs to be in range [1:4]\n");
+    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): Ncomponents needs to be in range [1:4]\n");
     return NULL;
   }
   if (blockSize < 1) {
-    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): blockSize is smaller than 1");
+    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): blockSize is smaller than 1");
     return NULL;
   }
 
@@ -94,10 +91,6 @@ char * createAsciiImage(unsigned char * image, int width, int height, int Ncompo
           unsigned char * currentPixel = image + ((by + y) * width + bx + x) * Ncomponents;
 
           unsigned char grayscaleValue = rgbToGrayscale(currentPixel, Ncomponents);
-          if (grayscaleValue == ERROR_GRAYSCALE_VAL) {
-            free(asciiImage);
-            return NULL;
-          }
           sum += grayscaleValue;
           ++count;
         }
@@ -134,7 +127,7 @@ void printImage(const char * filename, int blockSize)
   }
 
   printf("Read image width:%d Height:%d ComponentsSize:%d\n", width, height, Ncomponents);
-  char * asciiImage = createAsciiImage(image, width, height, Ncomponents, blockSize);
+  char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
   if (!asciiImage) {
     printf("Error converting image to ascii. Aborting...\n");
     return;
