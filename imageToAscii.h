@@ -54,6 +54,23 @@ char * createAsciiImage(unsigned char * image, int width, int height, int Ncompo
 // create array of ascii chars for output
 // returns NULL at error
 {
+  if (image == NULL) {
+    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): image is null pointer\n");
+    return NULL;
+  }
+  if (width < 0 || height < 0) {
+    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): wrong image Dimensions (width or height are smaller than 1 pixel)\n");
+    return NULL;
+  }
+  if (Ncomponents < 1 || Ncomponents > 4) {
+    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): Ncomponents needs to be in range [1:4]\n");
+    return NULL;
+  }
+  if (blockSize < 1) {
+    printf("Pre-condition createAsciiImage(unsigned char * image, int width, int height, int Ncomponents, int blockSize): blockSize is smaller than 1");
+    return NULL;
+  }
+
   int outWidth = width / blockSize;
   int outHeight = height / blockSize;
 
