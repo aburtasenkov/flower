@@ -14,6 +14,11 @@
 char * filenameExtension(const char * filename)
 // return the file extension of filename variable
 {
+  if (filename == NULL) {
+    printf("Pre-condition fileNameExtension(const char * filename): filename is null pointer\n");
+    return NULL;
+  }
+  
   regex_t regex;
   regmatch_t match[2];
 
