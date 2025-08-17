@@ -94,3 +94,36 @@ char * createAsciiImage(unsigned char * image, int width, int height, int Ncompo
   asciiImage[idx] = '\0';
   return asciiImage;
 }
+
+void printImage(const char * filename, int blockSize) 
+// convert image located at filename into ascii character array and print it out in terminal
+{
+  // pre-conditions
+  if (filename == NULL) {
+    printf("Pre-condition printImage(const char * filename, int blockSize): filename is null pointer\n");
+    return;
+  }
+  if (blockSize < 1) {
+    printf("Pre-condition printImage(const char * filename, int blockSize): blockSize is smaller than 1");
+    return;
+  }
+
+  // Load image
+  int width, height, Ncomponents;
+  unsigned char * image = stbi_load(filename, &width, &height, &Ncomponents, 0);
+  if (!image) {
+    printf("Error loading image. Aborting...\n");
+    return;
+  }
+
+  printf("Read image width:%d Height:%d ComponentsSize:%d\n", width, height, Ncomponents);
+  char * asciiImage = createAsciiImage(image, width, height, Ncomponents, blockSize);
+  if (!asciiImage) {
+    printf("Error converting image to ascii. Aborting...\n");
+    return;
+  }
+  printf("%s\n", asciiImage);
+
+  stbi_image_free(image);
+  free(asciiImage);
+}
