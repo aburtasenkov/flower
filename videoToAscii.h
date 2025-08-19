@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
 // --> max amount of frames = 9999
@@ -66,21 +67,54 @@ bool fileExists(const char * filename) {
   return false;
 }
 
+void calculateFrameTimeOffset(int FPS, struct timespec& start, struct timespec& end) 
+// sleep until the next frame should be displayed
+// start and end are the times of the current frame processing
+{
+  if (start.tv_sec > end.tv_sec || (start.tv_sec == end.tv_sec && start.tv_nsec > end.tv_nsec)) {
+    printf("Pre-condition calculateFrameTimeOffset(struct timespec& start, struct timespec& end, double& elapsedTime): start time is after end time\n");
+    return;
+  }
+
+  double frameTime = 1.0 / FPS;
+
+  elapsedTime = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+  double sleepTime = frameTime - elapsedTime;
+
+  if (sleepTime > 0) {
+    struct timespec sleepDuration;
+    sleepDuration.tv_sec = (time_t)sleepTime;
+    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * 1e9);
+    nanosleep(&sleepDuration, NULL);
+  }
+}
+
 void printFrames(int blockSize) {
   if (blockSize < 1) {
     printf("Pre-condition printFrames(int blockSize): blockSize is smaller than 1\n");
     return;
   }
   char filepath[22];
+  
+  int FPS = 60;
+
+  struct timespec start, end;
 
   // frames start at 0001
   for (int i = 1; i <= MAX_FRAMES; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    // Format the filepath for the current frame
     snprintf(filepath, sizeof(filepath), "frames/frame_%04d.png", i);
     if (!fileExists(filepath)) break;
 
-    executeCommand("clear"); // NON PORTABLE COMMAND
-    printf("Printing frame %04d...\n", i);
+    // Move cursor to the top left corner of the terminal and print the frame
+    printf("\033[H");
     printImage(filepath, blockSize);
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+
+    calculateFrameTimeOffset(start, end); // sleep until the next frame should be displayed
   }
 }
 
