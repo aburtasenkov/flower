@@ -82,7 +82,7 @@ char * createAsciiImage(const char * filename, unsigned char * image, int width,
   for (int by = 0; by < height; by += blockSize) {
     for (int bx = 0; bx < width; bx += blockSize) {
 
-      int sum = 0;
+      long long sum = 0;
       int count = 0;
 
       for (int y = 0; y < blockSize && (by + y) < height; ++y) {
