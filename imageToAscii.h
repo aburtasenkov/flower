@@ -68,8 +68,8 @@ char * createAsciiImage(const char * filename, unsigned char * image, int width,
     return NULL;
   }
 
-  int outWidth = width / blockSize;
-  int outHeight = height / blockSize;
+  int outWidth = (width + blockSize - 1) / blockSize;
+  int outHeight = (height + blockSize - 1) / blockSize;
 
   char * asciiImage = (char *)malloc(outWidth * outHeight + outHeight + 1); // +height for "\n" and +1 for "\0" characters
   if (!asciiImage) {
