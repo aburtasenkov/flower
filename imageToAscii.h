@@ -129,11 +129,10 @@ void printImage(const char * filename, int blockSize)
   char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
   if (!asciiImage) {
     printf("Error converting image to ascii. Aborting...\n");
-    stbi_image_free(image);
     return;
   }
-  printf("%s\n", asciiImage);
+  else printf("%s\n", asciiImage);
 
   stbi_image_free(image);
-  free(asciiImage);
+  if (asciiImage) free(asciiImage);
 }
