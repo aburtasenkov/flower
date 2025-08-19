@@ -74,7 +74,6 @@ char * createAsciiImage(const char * filename, unsigned char * image, int width,
   char * asciiImage = (char *)malloc(outWidth * outHeight + outHeight + 1); // +height for "\n" and +1 for "\0" characters
   if (!asciiImage) {
     printf("Cannot malloc enough space for asciiImage variable. Aborting...\n");
-    stbi_image_free(image);
     return NULL;
   }
   int idx = 0;
@@ -130,6 +129,7 @@ void printImage(const char * filename, int blockSize)
   char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
   if (!asciiImage) {
     printf("Error converting image to ascii. Aborting...\n");
+    stbi_image_free(image);
     return;
   }
   printf("%s\n", asciiImage);
