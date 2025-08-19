@@ -21,6 +21,8 @@ const char * clearCommand = "cls";
 const char * clearCommand = "clear";
 #endif
 
+#define NANOSECONDS_IN_SECOND 1e9
+
 int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
 {
@@ -80,6 +82,14 @@ void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end)
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
+  if (FPS <= 0) {
+    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): FPS is smaller than or equal to 0\n");
+    return;
+  }
+  if (start == NULL || end == NULL) {
+    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start or end is null pointer\n");
+    return;
+  }
   if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) {
     printf("Pre-condition calculateFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start time is after end time\n");
     return;
@@ -87,13 +97,13 @@ void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end)
 
   double frameTime = 1.0 / FPS;
 
-  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / 1e9;
+  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
   double sleepTime = frameTime - elapsedTime;
 
   if (sleepTime > 0) {
     timespec_t sleepDuration;
     sleepDuration.tv_sec = (time_t)sleepTime;
-    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * 1e9);
+    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * NANOSECONDS_IN_SECOND);
     nanosleep(&sleepDuration, NULL);
   }
 }
