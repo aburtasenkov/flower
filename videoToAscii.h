@@ -104,11 +104,29 @@ void printVideo(const char * filename, int blockSize)
   }
   snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filename);
 
-  if (executeCommand("mkdir frames") != 0) return;
-  if (executeCommand(ffmpegCommand) != 0) return;
-  if (executeCommand("clear") != 0) return; // NON PORTABLE COMMAND
+  if (executeCommand("mkdir frames") != 0) 
+  {
+    printf("Error creating frames directory. Aborting...\n");
+    free(ffmpegCommand);
+    return;
+  }
+  if (executeCommand(ffmpegCommand) != 0) 
+  {
+    printf("Error executing ffmpeg command: %s. Aborting...\n", ffmpegCommand);
+    free(ffmpegCommand);
+    return;
+  }
+  if (executeCommand("clear") != 0) // NON PORTABLE COMMAND
+  {
+    printf("Error clearing terminal. Aborting...\n");
+    free(ffmpegCommand);
+    return;
+  }
 
   printFrames(blockSize);
 
-  if (executeCommand("rm -rf frames") != 0) return;
+  if (executeCommand("rm -rf frames") != 0) {
+    printf("Error removing frames directory.\n");
+  }
+  free(ffmpegCommand);
 }
