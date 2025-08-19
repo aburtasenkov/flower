@@ -78,6 +78,8 @@ void printFrames(int blockSize) {
     snprintf(filepath, sizeof(filepath), "frames/frame_%04d.png", i);
     if (!fileExists(filepath)) break;
 
+    executeCommand("clear"); // NON PORTABLE COMMAND
+    printf("Printing frame %04d...\n", i);
     printImage(filepath, blockSize);
   }
 }
