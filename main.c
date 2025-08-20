@@ -5,12 +5,19 @@
 #include <stdio.h>
 #include <regex.h>
 #include <sys/wait.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define ARGC_MIN 2
 #define IMAGE_PATH_ARGV_INDEX 1
-#define BLOCKSIZE_ARGV_INDEX 2
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
+
+typedef struct {
+  char * filename;
+  int FPS;
+  int blockSize;
+} OPTIONS;
 
 char * filenameExtension(const char * filename)
 // return the file extension of filename variable
@@ -58,37 +65,63 @@ char * filenameExtension(const char * filename)
   return extension;
 }
 
-int main(int argc, char ** argv) {
-  /*-----------------------Load terminal input parameters-----------------------*/
+OPTIONS loadDefaultConfig() {
+  static OPTIONS config;
+  config.filename = NULL;
+  config.FPS = 24;
+  config.blockSize = 1; 
+  return config;
+}
+
+bool isVideo(const char * fileExtension) {
+  if (strcmp(fileExtension, "mp4") == 0) return true;
+  return false;
+}
+
+bool isImage(const char * fileExtension) {
+  const char * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
+  int count = 11;
+
+  for (int i = 0; i < 11; ++i) {
+    if (strcmp(fileExtension, ImageExtensionArray[i]) == 0) return true;
+  }
+  return false;
+}
+
+void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
   if (argc < ARGC_MIN) {
-    printf("Picture path not specified. Aborting...\n");
-    return 1;
+    printf("Arguments not specified. Aborting...\n");
+    exit(1);
   }
 
-  // First argument is the path of the pic which will be generated into ascii characters
-  char * filename = argv[IMAGE_PATH_ARGV_INDEX];
+  config->filename = argv[IMAGE_PATH_ARGV_INDEX];
+  for (int i = IMAGE_PATH_ARGV_INDEX + 1; i < argc; i++) {
+      if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
+          config->FPS = atoi(argv[++i]);
+      } else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
+          config->blockSize = atoi(argv[++i]);
+      } else {
+          printf("Warning: Unknown option '%s' ignored.\n", argv[i]);
+      }
+  }
+}
 
-  char * fileExtension = filenameExtension(filename);
-  if (!fileExtension) return 1;
+int main(int argc, char ** argv) {
+  /*-----------------------Load parameters from terminal-----------------------*/
+  OPTIONS config = loadDefaultConfig();
+  readTerminalArguments(&config, argc, argv);
 
-  printf("File Extension: %s\n", filenameExtension(filename));
-
-  // Second argument is size of blocksize
-  // default: 1 --> 1 pixel = 1 character
-  // blocksize 3 --> 3x3 square = 1 character
-  int blockSize;
-  if (argc == ARGC_MIN) blockSize = 1;
-  else blockSize = atoi(argv[BLOCKSIZE_ARGV_INDEX]); 
-  if (blockSize < 1) {
-    printf("Pre-condition: blockSize variable must be positive. Aborting...\n");
+  char * fileExtension = filenameExtension(config.filename);
+  if (!fileExtension) {
+    printf("No file extension found in %s. Aborting...\n", config.filename);
     return 1;
   }
-  
-  /*-----------------------Loading done-----------------------*/
+  else printf("File Extension: %s\n", fileExtension);
 
+  /*-----------------------Execute code-----------------------*/
 
-  if (strcmp(fileExtension, "png") == 0) printImage(filename, blockSize);
-  if (strcmp(fileExtension, "mp4") == 0) printVideo(filename, blockSize);
+  if (isVideo(fileExtension)) printVideo(config.filename, config.blockSize);
+  if (isImage(fileExtension)) printImage(config.filename, config.blockSize);
 
   free(fileExtension);
 
