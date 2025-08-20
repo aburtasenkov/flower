@@ -1,12 +1,10 @@
-#include "imageToAscii.h"
-#include "videoToAscii.h"
+#include "src/imageToAscii.h"
+#include "src/videoToAscii.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <regex.h>
-#include <sys/wait.h>
 #include <string.h>
-#include <stdbool.h>
 
 #define ARGC_MIN 2
 #define IMAGE_PATH_ARGV_INDEX 1

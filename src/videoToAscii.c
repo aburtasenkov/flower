@@ -1,8 +1,21 @@
 #include "videoToAscii.h"
+#include "imageToAscii.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+
+#define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
+// --> max amount of frames = 9999
+#define MAX_FRAMES 9999
+
+// OS dependent command to clear the terminal
+#ifdef _WIN32
+const char * clearCommand = "cls";
+#else
+const char * clearCommand = "clear";
+#endif
 
 int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging

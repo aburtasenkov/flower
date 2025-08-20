@@ -1,5 +1,9 @@
+#include "imageToAscii.h"
 
 #include <assert.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #define NANOSECONDS_IN_SECOND 1e9
 
