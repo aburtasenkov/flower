@@ -6,9 +6,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <time.h>
-
-typedef struct timespec timespec_t;
 
 #define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
 // --> max amount of frames = 9999
@@ -20,8 +17,6 @@ const char * clearCommand = "cls";
 #else
 const char * clearCommand = "clear";
 #endif
-
-#define NANOSECONDS_IN_SECOND 1e9
 
 int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging

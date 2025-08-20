@@ -18,6 +18,11 @@
 #include "stb_image.h"
 
 #include <assert.h>
+#include <time.h>
+
+#define NANOSECONDS_IN_SECOND 1e9
+
+typedef struct timespec timespec_t;
 
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
 // convert rgb value of a pixel to an ascii char
@@ -169,6 +174,7 @@ void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end)
 
 void printImageFPS(int FPS, const char * filename, int blockSize)
 // wrapper print Image with FPS control using FPSWrapper function
+{
   if (FPS < 0) {
     printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): FPS is smaller than 0\n");
     return;
