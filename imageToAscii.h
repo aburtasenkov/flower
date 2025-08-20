@@ -136,3 +136,57 @@ void printImage(const char * filename, int blockSize)
   stbi_image_free(image);
   if (asciiImage) free(asciiImage);
 }
+
+void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end) 
+// sleep until the next frame should be displayed
+// start and end are the times of the current frame processing
+{
+  if (FPS <= 0) {
+    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): FPS is smaller than or equal to 0\n");
+    return;
+  }
+  if (start == NULL || end == NULL) {
+    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start or end is null pointer\n");
+    return;
+  }
+  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) {
+    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start time is after end time\n");
+    return;
+  }
+
+  double frameTime = 1.0 / FPS;
+
+  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
+  double sleepTime = frameTime - elapsedTime;
+
+  if (sleepTime > 0) {
+    timespec_t sleepDuration;
+    sleepDuration.tv_sec = (time_t)sleepTime;
+    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * NANOSECONDS_IN_SECOND);
+    nanosleep(&sleepDuration, NULL);
+  }
+}
+
+void printImageFPS(int FPS, const char * filename, int blockSize)
+// wrapper print Image with FPS control using FPSWrapper function
+  if (FPS < 0) {
+    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): FPS is smaller than 0\n");
+    return;
+  }
+  if (filename == NULL) {
+    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): function or filename is null pointer\n");
+    return;
+  }
+  if (blockSize < 1) {
+    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): blockSize is smaller than 1\n");
+    return;
+  }
+
+  timespec_t start, end;
+
+  clock_gettime(CLOCK_MONOTONIC, &start); // start time
+  printImage(filename, blockSize);
+  clock_gettime(CLOCK_MONOTONIC, &end); // end time
+
+  sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next function call should be made
+}
