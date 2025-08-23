@@ -1,6 +1,8 @@
 #include <limits.h>
 
-unsigned char grayscaleToChar(unsigned char grayScaleValue) {
+unsigned char grayscaleToChar(unsigned char grayScaleValue)
+// map a value of 0-255 on to an array of grayscale characters and return the character
+{
   static const char const * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
   static const int AsciiSize = 70; // size of Ascii Array
 
