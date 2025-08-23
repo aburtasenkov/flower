@@ -7,8 +7,8 @@ int executeCommand(const char * command);
 
 bool fileExists(const char * filename);
 
-void printFrames(int blockSize);
+void printFrames(int blockSize, int FPS);
 
-void printVideo(const char * filename, int blockSize);
+void printVideo(const char * filename, int blockSize, int FPS);
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format

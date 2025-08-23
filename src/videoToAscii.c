@@ -1,6 +1,8 @@
 #include "videoToAscii.h"
 #include "imageToAscii.h"
 
+#include "error.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -72,16 +74,20 @@ bool fileExists(const char * filename) {
   return false;
 }
 
-void printFrames(int blockSize) {
+void printFrames(int blockSize, int FPS) {
   if (blockSize < 1) {
-    printf("Pre-condition printFrames(int blockSize): blockSize is smaller than 1\n");
+    printf("Pre-condition printFrames(int blockSize, int FPS): blockSize is smaller than 1\n");
+    return;
+  }
+  if (FPS < 0) {
+    printf("Pre-condition printFrames(int blockSize, int FPS): FPS is smaller than 0");
     return;
   }
   char filepath[22];
-  
-  int FPS = 144;
 
   timespec_t start, end;
+
+  bool UNLIMITED_FPS = FPS == 0 ? true : false;
 
   // frames start at 0001
   for (int i = 1; i <= MAX_FRAMES; ++i) {
@@ -97,21 +103,26 @@ void printFrames(int blockSize) {
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
-    sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
+    if (UNLIMITED_FPS) {
+      sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
+    }
   }
 }
 
-void printVideo(const char * filename, int blockSize) 
+void printVideo(const char * filename, int blockSize, int FPS) 
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 {
   if (filename == NULL) {
-    printf("Pre-condition void printVideo(const char * filename, int blockSize): filename is null pointer\n");
+    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): filename is null pointer\n");
     return;
   }
-
   if (blockSize < 1) {
-    printf("Pre-condition void printVideo(const char * filename, int blockSize): blockSize is smaller than 1");
+    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): blockSize is smaller than 1");
+    return;
+  }
+  if (FPS < 0) {
+    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): FPS is smaller than 0");
     return;
   }
 

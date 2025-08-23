@@ -118,7 +118,7 @@ int main(int argc, char ** argv) {
 
   /*-----------------------Execute code-----------------------*/
 
-  if (isVideo(fileExtension)) printVideo(config.filename, config.blockSize);
+  if (isVideo(fileExtension)) printVideo(config.filename, config.blockSize, config.FPS);
   if (isImage(fileExtension)) printImage(config.filename, config.blockSize);
 
   free(fileExtension);
