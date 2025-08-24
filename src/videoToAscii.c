@@ -22,19 +22,13 @@ const char * clearCommand = "clear";
 int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
 {
-  if (command == NULL) {
-    printf("Pre-condition executeCommand(const char * command): command is null pointer\n");
-    return 1;
-  }
+  if (command == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "command is null pointer");
 
   printf("Running command: %s\n", command);
   int statusCode = system(command);
 
   // check if system failed
-  if (statusCode == -1) {
-    printf("system(\"%s\") failed. Aborting...\n", command);
-    return 1;
-  }
+  if (statusCode == -1) printCriticalError(ERROR_RUNTIME, "system(\"%s\") failed", command);
 
   // it exited normally --> check exit code
   if (WIFEXITED(statusCode)) {
@@ -45,7 +39,7 @@ int executeCommand(const char * command)
       return 0;
     }
 
-    printf("\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
+    printNonCriticalError(exitCode, "\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
     return exitCode;
   }
 
@@ -53,20 +47,18 @@ int executeCommand(const char * command)
   // check for signal termination
   if (WIFSIGNALED(statusCode)) {
     int sig = WTERMSIG(statusCode);
-    printf("\"%s\" was terminated by signal %d.\n", command, sig);
-    return 128 + sig;  // common convention for signal termination
+    sig += 128; // common convention for signal termination
+    printNonCriticalError(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
+    return sig;
   }
 
   // all other non formal terminations
-  printf("system(\"%s\") did not terminate normally. Aborting...\n", command);
+  printCriticalError(ERROR_RUNTIME, "system(\"%s\") did not terminate normally", command);
   return 1;
 }
 
 bool fileExists(const char * filename) {
-  if (filename == NULL) {
-    printf("Pre-condition fileExists(const char * filename): filename is null pointer\n");
-    return false;
-  }
+  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
 
   if (access(filename, F_OK) == 0) {
     return true;
@@ -74,15 +66,12 @@ bool fileExists(const char * filename) {
   return false;
 }
 
-void printFrames(int blockSize, int FPS) {
-  if (blockSize < 1) {
-    printf("Pre-condition printFrames(int blockSize, int FPS): blockSize is smaller than 1\n");
-    return;
-  }
-  if (FPS < 0) {
-    printf("Pre-condition printFrames(int blockSize, int FPS): FPS is smaller than 0");
-    return;
-  }
+void printFrames(int blockSize, int FPS) 
+// print each frame of a video while accounting for wished FPS
+{
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
+  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
+
   char filepath[22];
 
   timespec_t start, end;
@@ -113,50 +102,38 @@ void printVideo(const char * filename, int blockSize, int FPS)
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 {
-  if (filename == NULL) {
-    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): filename is null pointer\n");
-    return;
-  }
-  if (blockSize < 1) {
-    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): blockSize is smaller than 1");
-    return;
-  }
-  if (FPS < 0) {
-    printf("Pre-condition printVideo(const char * filename, int blockSize, int FPS): FPS is smaller than 0");
-    return;
-  }
+  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
+  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
 
   size_t ffmpegCommandSize = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filename) + 1;
   char * ffmpegCommand = (char *)malloc(ffmpegCommandSize);
-  if (ffmpegCommand == NULL) {
-    printf("Error allocating memory for ffmpegCommand in printVideo(const char * filename, int blockSize). Aborting...\n");
-    return;
-  }
+  if (ffmpegCommand == NULL) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for ffmpegCommand [size in bytes: %zu]", ffmpegCommandSize);
   snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filename);
 
   if (executeCommand("mkdir frames") != 0) 
   {
-    printf("Error creating frames directory. Aborting...\n");
+    printNonCriticalError(ERROR_RUNTIME, "Can not create \"frames\" directory");
     free(ffmpegCommand);
     return;
   }
   if (executeCommand(ffmpegCommand) != 0) 
   {
-    printf("Error executing ffmpeg command: %s. Aborting...\n", ffmpegCommand);
+    printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpegCommand);
     free(ffmpegCommand);
     return;
   }
   
   if (executeCommand(clearCommand) != 0) {
-    printf("Error clearing terminal. Aborting...\n");
+    printNonCriticalError(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
     free(ffmpegCommand);
     return;
   }
 
-  printFrames(blockSize);
+  printFrames(blockSize, FPS);
 
   if (executeCommand("rm -rf frames") != 0) {
-    printf("Error removing frames directory.\n");
+    printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
   free(ffmpegCommand);
 }

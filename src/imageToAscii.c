@@ -1,19 +1,20 @@
 #include "imageToAscii.h"
 
-#include <assert.h>
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#include "error.h"
+
+#include <assert.h>
+#include <stdbool.h>
 
 #define NANOSECONDS_IN_SECOND 1e9
 
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
-// convert rgb value of a pixel to an ascii char
+// convert single or multichannel pixel to grayscale value [0:255]
 {
-  // pixel not null pointer
-  assert(pixel != NULL);
-  // Ncomponents in range[1:4]
-  assert(Ncomponents > 0 && Ncomponents < 5);
+  if (pixel == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "pixel is null pointer");
+  if (!(Ncomponents > 0 && Ncomponents < 5)) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents is not in range [1:4] [Ncomponents: %i]", Ncomponents);
 
   static const float RGB_FACTORS[] = {0.299f, 0.587f, 0.114f};
 
@@ -35,35 +36,20 @@ unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents)
 }
 
 char * createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
-// create array of ascii chars for output
-// returns NULL at error
+// create array of ascii characters
+// this array includes \n and \o for newlines and end of string
 {
   printf("Converting image %s into ascii grayscale array\n", filename);
-  if (image == NULL) {
-    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): image is null pointer\n");
-    return NULL;
-  }
-  if (width < 0 || height < 0) {
-    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): wrong image Dimensions (width or height are smaller than 1 pixel)\n");
-    return NULL;
-  }
-  if (Ncomponents < 1 || Ncomponents > 4) {
-    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): Ncomponents needs to be in range [1:4]\n");
-    return NULL;
-  }
-  if (blockSize < 1) {
-    printf("Pre-condition createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize): blockSize is smaller than 1");
-    return NULL;
-  }
+  if (image == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "image is null pointer");
+  if (width < 0 || height < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "wrong image Dimensions [width: %i, height: %i]", width, height);
+  if (Ncomponents < 1 || Ncomponents > 4) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents needs to be in range [1:4] [Ncomponents: %i]", Ncomponents);
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %i]", blockSize);
 
   int outWidth = (width + blockSize - 1) / blockSize;
   int outHeight = (height + blockSize - 1) / blockSize;
 
   char * asciiImage = (char *)malloc(outWidth * outHeight + outHeight + 1); // +height for "\n" and +1 for "\0" characters
-  if (!asciiImage) {
-    printf("Cannot malloc enough space for asciiImage variable. Aborting...\n");
-    return NULL;
-  }
+  if (!asciiImage) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for asciiImage [size in bytes: %i]", outWidth * outHeight + outHeight + 1);
   int idx = 0;
 
   // iterate over each pixel
@@ -96,29 +82,17 @@ void printImage(const char * filename, int blockSize)
 // convert image located at filename into ascii character array and print it out in terminal
 {
   // pre-conditions
-  if (filename == NULL) {
-    printf("Pre-condition printImage(const char * filename, int blockSize): filename is null pointer\n");
-    return;
-  }
-  if (blockSize < 1) {
-    printf("Pre-condition printImage(const char * filename, int blockSize): blockSize is smaller than 1");
-    return;
-  }
+  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
 
   // Load image
   int width, height, Ncomponents;
   unsigned char * image = stbi_load(filename, &width, &height, &Ncomponents, 0);
-  if (!image) {
-    printf("Error loading image. Aborting...\n");
-    return;
-  }
+  if (!image) printCriticalError(ERROR_INTERNAL, "Cannot load image [filename: %s]", filename);
 
   printf("Read image width:%d Height:%d ComponentsSize:%d\n", width, height, Ncomponents);
   char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
-  if (!asciiImage) {
-    printf("Error converting image to ascii. Aborting...\n");
-    return;
-  }
+  if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
 
   stbi_image_free(image);
@@ -129,18 +103,10 @@ void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end)
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
-  if (FPS <= 0) {
-    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): FPS is smaller than or equal to 0\n");
-    return;
-  }
-  if (start == NULL || end == NULL) {
-    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start or end is null pointer\n");
-    return;
-  }
-  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) {
-    printf("Pre-condition sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end): start time is after end time\n");
-    return;
-  }
+  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
+  if (start == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "start is null pointer");
+  if (end == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "end is null pointer");
+  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) printCriticalError(ERROR_BAD_ARGUMENTS, "start time is after end time");
 
   double frameTime = 1.0 / FPS;
 
@@ -155,21 +121,12 @@ void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end)
   }
 }
 
-void printImageFPS(int FPS, const char * filename, int blockSize)
-// wrapper print Image with FPS control using FPSWrapper function
+void printImageFPS(const char * filename, int blockSize, int FPS)
+// wrap printing image with FPS control
 {
-  if (FPS < 0) {
-    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): FPS is smaller than 0\n");
-    return;
-  }
-  if (filename == NULL) {
-    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): function or filename is null pointer\n");
-    return;
-  }
-  if (blockSize < 1) {
-    printf("Pre-condition printImageFPS(int FPS, const char * filename, int blockSize): blockSize is smaller than 1\n");
-    return;
-  }
+  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is nullpointer");
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
+  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
 
   timespec_t start, end;
 

@@ -1,6 +1,8 @@
 #include "src/imageToAscii.h"
 #include "src/videoToAscii.h"
 
+#include "src/error.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <regex.h>
@@ -87,10 +89,7 @@ bool isImage(const char * fileExtension) {
 }
 
 void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
-  if (argc < ARGC_MIN) {
-    printf("Arguments not specified. Aborting...\n");
-    exit(1);
-  }
+  if (argc < ARGC_MIN) printCriticalError(ERROR_BAD_ARGUMENTS, "Arguments not specified");
 
   config->filename = argv[IMAGE_PATH_ARGV_INDEX];
   for (int i = IMAGE_PATH_ARGV_INDEX + 1; i < argc; i++) {
@@ -99,7 +98,7 @@ void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
       } else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
           config->blockSize = atoi(argv[++i]);
       } else {
-          printf("Warning: Unknown option '%s' ignored.\n", argv[i]);
+          printf("Warning: Unknown option '%s' ignored\n", argv[i]);
       }
   }
 }
@@ -110,10 +109,7 @@ int main(int argc, char ** argv) {
   readTerminalArguments(&config, argc, argv);
 
   char * fileExtension = filenameExtension(config.filename);
-  if (!fileExtension) {
-    printf("No file extension found in %s. Aborting...\n", config.filename);
-    return 1;
-  }
+  if (!fileExtension) printCriticalError(ERROR_BAD_ARGUMENTS, "No file extension found in %s", config.filename);
   else printf("File Extension: %s\n", fileExtension);
 
   /*-----------------------Execute code-----------------------*/

@@ -8,6 +8,7 @@ int executeCommand(const char * command);
 bool fileExists(const char * filename);
 
 void printFrames(int blockSize, int FPS);
+// print each frame of a video while accounting for wished FPS
 
 void printVideo(const char * filename, int blockSize, int FPS);
 // convert a mp4 video into a sequence of frames in "frames" folder
