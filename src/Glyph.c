@@ -3,7 +3,7 @@
 
 const Glyph FONT[] = {
 // Each row uses the low 5 bits
-// 'A'..'Z' and space currently
+// currently only 'A'-'Z' and space
 {' ', {0b00000,0b00000,0b00000,0b00000,0b00000,0b00000,0b00000}},
 {'A', {0b01110,0b10001,0b10001,0b11111,0b10001,0b10001,0b10001}},
 {'B', {0b11110,0b10001,0b10001,0b11110,0b10001,0b10001,0b11110}},
@@ -33,4 +33,15 @@ const Glyph FONT[] = {
 {'Z', {0b11111,0b00001,0b00010,0b00100,0b01000,0b10000,0b11111}},
 };
 
-const size_t FONT_COUNT = sizeof(FONT)/sizeof(FONT[0]);
+const size_t FONT_COUNT = sizeof(FONT) / sizeof(FONT[0]);
+
+const uint8_t * glyph_rows(char c) 
+// return binary rows of an ascii char for further image creation
+{
+    if (c == ' ') return FONT[0].rows;
+    c = (char)toupper((unsigned char)c);
+    for (size_t i = 0; i < FONT_COUNT; ++i) {
+        if (FONT[i].c == c) return FONT[i].rows;
+    }
+    return FONT[0].rows; // fallback to space for unsupported chars
+}
