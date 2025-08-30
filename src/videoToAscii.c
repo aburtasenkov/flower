@@ -34,9 +34,9 @@ int executeCommand(const char * command)
   if (WIFEXITED(statusCode)) {
     int exitCode = WEXITSTATUS(statusCode);
 
-    if (exitCode == 0) {
+    if (exitCode == SUCCESS) {
       printf("\"%s\" ran successfully.\n", command);
-      return 0;
+      return SUCCESS;
     }
 
     printNonCriticalError(exitCode, "\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
@@ -60,7 +60,7 @@ int executeCommand(const char * command)
 bool fileExists(const char * filename) {
   if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
 
-  if (access(filename, F_OK) == 0) {
+  if (access(filename, F_OK) == SUCCESS) {
     return true;
   }
   return false;
@@ -111,20 +111,20 @@ void printVideo(const char * filename, int blockSize, int FPS)
   if (ffmpegCommand == NULL) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for ffmpegCommand [size in bytes: %zu]", ffmpegCommandSize);
   snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filename);
 
-  if (executeCommand("mkdir frames") != 0) 
+  if (executeCommand("mkdir frames") != SUCCESS) 
   {
     printNonCriticalError(ERROR_RUNTIME, "Can not create \"frames\" directory");
     free(ffmpegCommand);
     return;
   }
-  if (executeCommand(ffmpegCommand) != 0) 
+  if (executeCommand(ffmpegCommand) != SUCCESS) 
   {
     printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpegCommand);
     free(ffmpegCommand);
     return;
   }
   
-  if (executeCommand(clearCommand) != 0) {
+  if (executeCommand(clearCommand) != SUCCESS) {
     printNonCriticalError(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
     free(ffmpegCommand);
     return;
@@ -132,7 +132,7 @@ void printVideo(const char * filename, int blockSize, int FPS)
 
   printFrames(blockSize, FPS);
 
-  if (executeCommand("rm -rf frames") != 0) {
+  if (executeCommand("rm -rf frames") != SUCCESS) {
     printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
   free(ffmpegCommand);

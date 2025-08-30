@@ -2,6 +2,7 @@
 
 #include <stdio.h> // fprintf will work everywhere
 
+#define SUCCESS 0
 #define ERROR_BAD_ARGUMENTS 1
 #define ERROR_INTERNAL 2
 #define ERROR_EXTERNAL 3

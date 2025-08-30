@@ -31,7 +31,7 @@ char * filenameExtension(const char * filename)
   regmatch_t match[2];
 
   int statusCode = regcomp(&regex, REGEX_FILE_EXTENSION_PATTERN, REG_EXTENDED);
-  if (statusCode != 0) {
+  if (statusCode != SUCCESS) {
     char errorBuffer[128];
     regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
     printf("Regex compilation failed: %s... Aborting\n", errorBuffer);
@@ -39,7 +39,7 @@ char * filenameExtension(const char * filename)
   }
 
   statusCode = regexec(&regex, filename, 2, match, 0);
-  if (statusCode != 0) {
+  if (statusCode != SUCCESS) {
     char errorBuffer[128];
     regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
     printf("Regex match failed: %s... Aborting\n", errorBuffer);
@@ -74,7 +74,7 @@ OPTIONS loadDefaultConfig() {
 }
 
 bool isVideo(const char * fileExtension) {
-  if (strcmp(fileExtension, "mp4") == 0) return true;
+  if (strcmp(fileExtension, "mp4") == SUCCESS) return true;
   return false;
 }
 
@@ -83,7 +83,7 @@ bool isImage(const char * fileExtension) {
   int count = 11;
 
   for (int i = 0; i < 11; ++i) {
-    if (strcmp(fileExtension, ImageExtensionArray[i]) == 0) return true;
+    if (strcmp(fileExtension, ImageExtensionArray[i]) == SUCCESS) return true;
   }
   return false;
 }
@@ -93,9 +93,9 @@ void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
 
   config->filename = argv[IMAGE_PATH_ARGV_INDEX];
   for (int i = IMAGE_PATH_ARGV_INDEX + 1; i < argc; i++) {
-      if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
+      if (strcmp(argv[i], "-f") == SUCCESS && i + 1 < argc) {
           config->FPS = atoi(argv[++i]);
-      } else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
+      } else if (strcmp(argv[i], "-b") == SUCCESS && i + 1 < argc) {
           config->blockSize = atoi(argv[++i]);
       } else {
           printf("Warning: Unknown option '%s' ignored\n", argv[i]);
@@ -119,5 +119,5 @@ int main(int argc, char ** argv) {
 
   free(fileExtension);
 
-  return 0;
+  return SUCCESS;
 }
