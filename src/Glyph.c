@@ -1,8 +1,10 @@
 
 #include "Glyph.h"
 
-extern uint8_t RGB_WHITE[] = {255, 255, 255};
-extern uint8_t RGB_BLACK[] = {0, 0, 0};
+#include "ctype.h"
+
+uint8_t RGB_WHITE[] = {255, 255, 255};
+uint8_t RGB_BLACK[] = {0, 0, 0};
 
 const Glyph FONT[] = {
 // Each row uses the low 5 bits
