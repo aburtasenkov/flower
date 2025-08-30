@@ -1,6 +1,9 @@
 
 #include "Glyph.h"
 
+extern uint8_t RGB_WHITE[] = {255, 255, 255};
+extern uint8_t RGB_BLACK[] = {0, 0, 0};
+
 const Glyph FONT[] = {
 // Each row uses the low 5 bits
 // currently only 'A'-'Z' and space
@@ -35,7 +38,7 @@ const Glyph FONT[] = {
 
 const size_t FONT_COUNT = sizeof(FONT) / sizeof(FONT[0]);
 
-const uint8_t * glyph_rows(char c) 
+const uint8_t * glyphRows(char c) 
 // return binary rows of an ascii char for further image creation
 {
     if (c == ' ') return FONT[0].rows;
