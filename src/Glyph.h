@@ -9,6 +9,8 @@
 extern uint8_t RGB_WHITE[];
 extern uint8_t RGB_BLACK[];
 
+#define RGB_CHANNELS 3
+
 typedef struct { char c; uint8_t rows[GLYPH_H]; } Glyph;
 
 extern const Glyph FONT[];
