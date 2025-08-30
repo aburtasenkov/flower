@@ -1,7 +1,8 @@
-#include "grayscaleToPpm.h" 
+#include "asciiToPpm.h" 
 
 #include "error.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 
 char * ppmHeader(const char * ascii)
@@ -21,16 +22,17 @@ char * ppmHeader(const char * ascii)
     //         ++height;
     //     }
     // }
+    return NULL;
 }
 
 void asciiToPpm(const char * ascii, const char * filepath) 
 // write ascii characters in PPM file format to filepath
 {
     if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
-    if (!filename) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+    if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
-    File * ppm = fopen(filename);
-    if (!ppm) printCriticalError(ERROR_BAD_ARGUMENTS, "Bad filepath [filename: %s]", filename);
+    // File * ppm = fopen(filename);
+    // if (!ppm) printCriticalError(ERROR_BAD_ARGUMENTS, "Bad filepath [filename: %s]", filename);
 
 
     
