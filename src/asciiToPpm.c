@@ -24,7 +24,7 @@ int countColumns(const char * ascii) {
         if (*ascii == '\n') break; 
         ++count;
     }
-    return ++count;
+    return count;
 }
 
 char * ppmHeader(const char * ascii)
@@ -62,14 +62,47 @@ void asciiToPpm(const char * ascii, const char * filepath)
     if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
     if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
+    int width = countColumns(ascii);
+    int height = countRows(ascii);
     printf("%d\n", countRows(ascii));
     printf("%d\n", countColumns(ascii));
 
-    int imageSizeX = GLYPH_W * countColumns(ascii);
-    int imageSizeY = GLYPH_H  * countRows(ascii);
+    int imageSizeX = GLYPH_W * width;
+    int imageSizeY = GLYPH_H  * height;
     int imageSize = imageSizeX * imageSizeY * RGB_CHANNELS;
     unsigned char * image = (unsigned char *)malloc(imageSize);
 
-    // initialize all pixels to black
-    for (int i = 0; i < imageSize; ++i) image[i] = 0;
+    // initialize all pixels to white
+    for (int i = 0; i < imageSize; ++i) image[i] = 255;
+
+    // fill the characters in
+    int pen_x = 0;
+    int pen_y = 0;
+
+    // iterate over each character
+    for (int i = 0; ascii[i] != '\0'; ++i) {
+        // move "pen" to start of line
+        if (ascii[i] == '\n') {
+            pen_x = 0;
+            pen_y += GLYPH_H;
+            continue;
+        }
+
+        // get current row of pixels and iterate over it
+        const uint8_t* pixelRows = glyphRows(ascii[i]);
+
+        for (int glyphRow = 0; glyphRow < GLYPH_H; ++glyphRow) {
+            uint8_t pixels = pixelRows[glyphRow];
+            for (int glyphColumn = 0; glyphColumn < GLYPH_W; ++glyphColumn) {
+                if (pixels << glyphColumn & MOST_SIGNIFICANT_BIT) {
+                    printf("X");
+                    setPixel(image, width, pen_x + glyphColumn, pen_y + glyphRow, RGB_BLACK);
+                }
+                else printf(" ");
+            }
+            printf("\n");
+        }
+        pen_x += GLYPH_W;
+        printf("\n");
+    }
 }
