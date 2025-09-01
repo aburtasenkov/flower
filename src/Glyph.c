@@ -87,7 +87,6 @@ const size_t FONT_COUNT = sizeof(FONT) / sizeof(FONT[0]);
 const uint8_t * glyphRows(char c) 
 // return binary rows of an ascii char for further image creation
 {
-    c = (char)toupper((unsigned char)c);
     for (size_t i = 0; i < FONT_COUNT; ++i) {
         if (FONT[i].c == c) return FONT[i].rows;
     }
