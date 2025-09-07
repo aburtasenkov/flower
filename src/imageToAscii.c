@@ -5,10 +5,10 @@
 
 #include "error.h"
 
+#include "asciiToPpm.h"
+
 #include <assert.h>
 #include <stdbool.h>
-
-#define NANOSECONDS_IN_SECOND 1e9
 
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
@@ -95,44 +95,8 @@ void printImage(const char * filename, int blockSize)
   if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
 
+  asciiToPpm(asciiImage, "testing.ppm");
+
   stbi_image_free(image);
   if (asciiImage) free(asciiImage);
-}
-
-void sleepFrameTimeOffset(int FPS, timespec_t* start, timespec_t* end) 
-// sleep until the next frame should be displayed
-// start and end are the times of the current frame processing
-{
-  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
-  if (start == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "start is null pointer");
-  if (end == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "end is null pointer");
-  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) printCriticalError(ERROR_BAD_ARGUMENTS, "start time is after end time");
-
-  double frameTime = 1.0 / FPS;
-
-  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
-  double sleepTime = frameTime - elapsedTime;
-
-  if (sleepTime > 0) {
-    timespec_t sleepDuration;
-    sleepDuration.tv_sec = (time_t)sleepTime;
-    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * NANOSECONDS_IN_SECOND);
-    nanosleep(&sleepDuration, NULL);
-  }
-}
-
-void printImageFPS(const char * filename, int blockSize, int FPS)
-// wrap printing image with FPS control
-{
-  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is nullpointer");
-  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
-  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
-
-  timespec_t start, end;
-
-  clock_gettime(CLOCK_MONOTONIC, &start); // start time
-  printImage(filename, blockSize);
-  clock_gettime(CLOCK_MONOTONIC, &end); // end time
-
-  sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next function call should be made
 }

@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#define NANOSECONDS_IN_SECOND 1e9
+
 #define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.png"
 // --> max amount of frames = 9999
 #define MAX_FRAMES 9999
@@ -92,7 +94,7 @@ void printFrames(int blockSize, int FPS)
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
-    if (UNLIMITED_FPS) {
+    if (!UNLIMITED_FPS) {
       sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
     }
   }
@@ -136,4 +138,26 @@ void printVideo(const char * filename, int blockSize, int FPS)
     printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
   free(ffmpegCommand);
+}
+
+void sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end) 
+// sleep until the next frame should be displayed
+// start and end are the times of the current frame processing
+{
+  if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
+  if (start == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "start is null pointer");
+  if (end == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "end is null pointer");
+  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec)) printCriticalError(ERROR_BAD_ARGUMENTS, "start time is after end time");
+
+  double frameTime = 1.0 / FPS;
+
+  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
+  double sleepTime = frameTime - elapsedTime;
+
+  if (sleepTime > 0) {
+    timespec_t sleepDuration;
+    sleepDuration.tv_sec = (time_t)sleepTime;
+    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * NANOSECONDS_IN_SECOND);
+    nanosleep(&sleepDuration, NULL);
+  }
 }
