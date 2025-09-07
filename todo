@@ -1,2 +1,4 @@
 -make stb_image.h read return a struct that contains data for image and the image
--add binary maps for other characters to glyph
+-make padding between glyphs adjustable
+-add -o parameter for output in files --> writing ppm format
+-make conversion of ppms to video again
