@@ -1,11 +1,9 @@
 #include "imageToAscii.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include "error.h"
 
-#include "asciiToPpm.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 #include <assert.h>
 #include <stdbool.h>
@@ -94,8 +92,6 @@ void printImage(const char * filename, int blockSize)
   char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
   if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
-
-  asciiToPpm(asciiImage, "testing.ppm");
 
   stbi_image_free(image);
   if (asciiImage) free(asciiImage);
