@@ -2,8 +2,7 @@
 
 #include "error.h"
 
-#include <stdlib.h>
-// #include <stdio.h>
+#include <stdio.h>
 #include <regex.h>
 #include <string.h>
 
