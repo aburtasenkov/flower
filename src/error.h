@@ -1,8 +1,9 @@
 #pragma once
 
-#include <stdio.h> // fprintf will work everywhere
+#include <stdio.h>
+#include <stdlib.h>
 
-#define SUCCESS 0
+#define SUCCESS EXIT_SUCCESS
 #define ERROR_BAD_ARGUMENTS 1
 #define ERROR_INTERNAL 2
 #define ERROR_EXTERNAL 3
