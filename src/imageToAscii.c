@@ -8,6 +8,34 @@
 #include <assert.h>
 #include <stdbool.h>
 
+ImageStbi * loadStbi(const char * filename)
+// create object of ImageStbi class that loads images in format that is supported by stbi
+{
+  if (!filename) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+
+  ImageStbi * stbi = (ImageStbi *)malloc(sizeof(ImageStbi));
+  if (!stbi) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
+
+  int width, height, Ncomponents;
+  unsigned char * data = stbi_load(filename, &width, &height, &Ncomponents, 0);
+  if (!data) printCriticalError(ERROR_INTERNAL, "Cannot load image [filename: %s]", filename);
+
+  stbi->data = data;
+  stbi->width = width;
+  stbi->height = height;
+  stbi->Ncomponents = Ncomponents;
+
+  return stbi;
+}
+
+void freeStbi(ImageStbi * stbi) {
+  if (!stbi) return;
+  if (!stbi->data) { free(stbi); return; }
+
+  stbi_image_free(stbi->data);
+  free(stbi);
+}
+
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
@@ -84,15 +112,13 @@ void printImage(const char * filename, int blockSize)
   if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
 
   // Load image
-  int width, height, Ncomponents;
-  unsigned char * image = stbi_load(filename, &width, &height, &Ncomponents, 0);
-  if (!image) printCriticalError(ERROR_INTERNAL, "Cannot load image [filename: %s]", filename);
+  ImageStbi * stbi = loadStbi(filename);
 
-  printf("Read image width:%d Height:%d ComponentsSize:%d\n", width, height, Ncomponents);
-  char * asciiImage = createAsciiImage(filename, image, width, height, Ncomponents, blockSize);
+  printf("Read image width:%d Height:%d ComponentsSize:%d\n", stbi->width, stbi->height, stbi->Ncomponents);
+  char * asciiImage = createAsciiImage(filename, stbi->data, stbi->width, stbi->height, stbi->Ncomponents, blockSize);
   if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
 
-  stbi_image_free(image);
+  freeStbi(stbi);
   if (asciiImage) free(asciiImage);
 }
