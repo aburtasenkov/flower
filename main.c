@@ -3,6 +3,7 @@
 #include "src/Config.h"
 #include "src/terminalInput.h"
 #include "src/error.h"
+#include "src/writeFile.h"
 
 #include "stdlib.h"
 
@@ -24,7 +25,8 @@ int main(int argc, char ** argv) {
   else if (isImage(extension))
   {
     if (config.output) {
-      // printf("filepath: %s, extension: %s\n", config.filepath, fileExtension(config.filepath));
+      writeImage(config.filepath, config.output, config.blockSize);
+      printf("Wrote ascii image to file: %s\n", config.output);
     }
     else printImage(config.filepath, config.blockSize);
   }
