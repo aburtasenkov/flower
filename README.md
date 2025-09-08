@@ -1,6 +1,7 @@
 # flower
 
 Why is if called flower?
+
 -I wanted to send my girlfriend an ascii flower.
 
 Flower is a C-based tool that converts **images and videos into ASCII art**, viewable directly in your terminal or exportable to a file. Built for speed, simplicity, and fun, this project demonstrates system-level programming, multimedia handling, and creative visualization.
