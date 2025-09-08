@@ -17,7 +17,7 @@ void freeStbi(ImageStbi * image);
 unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents);
 // convert single or multichannel pixel to grayscale value [0:255]
 
-char * createAsciiImage(const char * filepath, unsigned char * image, int width, int height, int Ncomponents, int blockSize);
+char * stbiToAscii(ImageStbi * stbi, int blockSize);
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 

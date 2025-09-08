@@ -61,35 +61,35 @@ unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents)
   return grayscale;
 }
 
-char * createAsciiImage(const char * filepath, unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
+char * stbiToAscii(ImageStbi * stbi, int blockSize) 
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 {
-  printf("Converting image %s into ascii grayscale array\n", filepath);
-  if (image == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "image is null pointer");
-  if (width < 0 || height < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "wrong image Dimensions [width: %i, height: %i]", width, height);
-  if (Ncomponents < 1 || Ncomponents > 4) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents needs to be in range [1:4] [Ncomponents: %i]", Ncomponents);
+  if (!stbi) printCriticalError(ERROR_BAD_ARGUMENTS, "stbi is null pointer");
+  if (!stbi->data) printCriticalError(ERROR_BAD_ARGUMENTS, "stbi->data is null pointer");
+  if (stbi->width < 0 || stbi->height < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "wrong image Dimensions [width: %i, height: %i]", stbi->width, stbi->height);
+  if (stbi->Ncomponents < 1 || stbi->Ncomponents > 4) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents needs to be in range [1:4] [Ncomponents: %i]", stbi->Ncomponents);
   if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %i]", blockSize);
 
-  int outWidth = (width + blockSize - 1) / blockSize;
-  int outHeight = (height + blockSize - 1) / blockSize;
+  int outWidth = (stbi->width + blockSize - 1) / blockSize;
+  int outHeight = (stbi->height + blockSize - 1) / blockSize;
 
   char * asciiImage = (char *)malloc(outWidth * outHeight + outHeight + 1); // +height for "\n" and +1 for "\0" characters
   if (!asciiImage) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for asciiImage [size in bytes: %i]", outWidth * outHeight + outHeight + 1);
   int idx = 0;
 
   // iterate over each pixel
-  for (int by = 0; by < height; by += blockSize) {
-    for (int bx = 0; bx < width; bx += blockSize) {
+  for (int by = 0; by < stbi->height; by += blockSize) {
+    for (int bx = 0; bx < stbi->width; bx += blockSize) {
 
       long long sum = 0;
       int count = 0;
 
-      for (int y = 0; y < blockSize && (by + y) < height; ++y) {
-        for (int x = 0; x < blockSize && (bx + x) < width; ++x) {
-          unsigned char * currentPixel = image + ((by + y) * width + bx + x) * Ncomponents;
+      for (int y = 0; y < blockSize && (by + y) < stbi->height; ++y) {
+        for (int x = 0; x < blockSize && (bx + x) < stbi->width; ++x) {
+          unsigned char * currentPixel = stbi->data + ((by + y) * stbi->width + bx + x) * stbi->Ncomponents;
 
-          unsigned char grayscaleValue = rgbToGrayscale(currentPixel, Ncomponents);
+          unsigned char grayscaleValue = rgbToGrayscale(currentPixel, stbi->Ncomponents);
           sum += grayscaleValue;
           ++count;
         }
@@ -113,9 +113,10 @@ void printImage(const char * filepath, int blockSize)
 
   // Load image
   ImageStbi * stbi = loadStbi(filepath);
-
   printf("Read image width:%d Height:%d ComponentsSize:%d\n", stbi->width, stbi->height, stbi->Ncomponents);
-  char * asciiImage = createAsciiImage(filepath, stbi->data, stbi->width, stbi->height, stbi->Ncomponents, blockSize);
+
+  printf("Converting image %s into ascii grayscale array\n", filepath);
+  char * asciiImage = stbiToAscii(stbi, blockSize);
   if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
 
