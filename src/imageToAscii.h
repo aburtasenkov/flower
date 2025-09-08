@@ -1,7 +1,5 @@
 #pragma once 
 
-#include "grayscale.h"
-
 typedef struct {
     unsigned char * data;
     int width;
