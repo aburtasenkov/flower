@@ -7,8 +7,8 @@
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
 
-char * filenameExtension(const char * filename);
-// return the file extension of filename variable
+char * fileExtension(const char * filepath);
+// return the file extension of filepath variable
 
 bool isVideo(const char * fileExtension);
 

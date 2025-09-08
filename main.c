@@ -11,16 +11,25 @@ int main(int argc, char ** argv) {
   OPTIONS config = loadDefaultConfig();
   readTerminalArguments(&config, argc, argv);
 
-  char * fileExtension = filenameExtension(config.filename);
-  if (!fileExtension) printCriticalError(ERROR_BAD_ARGUMENTS, "No file extension found in %s", config.filename);
-  else printf("File Extension: %s\n", fileExtension);
+  char * extension = fileExtension(config.filepath);
+  if (!extension) printCriticalError(ERROR_BAD_ARGUMENTS, "No file extension found in %s", config.filepath);
+  else printf("File Extension: %s\n", extension);
 
   /*-----------------------Execute code-----------------------*/
 
-  if (isVideo(fileExtension)) printVideo(config.filename, config.blockSize, config.FPS);
-  if (isImage(fileExtension)) printImage(config.filename, config.blockSize);
+  if (isVideo(extension)) 
+  {
+    printVideo(config.filepath, config.blockSize, config.FPS);
+  }
+  else if (isImage(extension))
+  {
+    if (config.output) {
+      // printf("filepath: %s, extension: %s\n", config.filepath, fileExtension(config.filepath));
+    }
+    else printImage(config.filepath, config.blockSize);
+  }
 
-  free(fileExtension);
+  free(extension);
 
   return SUCCESS;
 }

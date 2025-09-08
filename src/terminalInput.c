@@ -6,11 +6,11 @@
 #include <regex.h>
 #include <string.h>
 
-char * filenameExtension(const char * filename)
-// return the file extension of filename variable
+char * fileExtension(const char * filepath)
+// return the file extension of filepath variable
 {
-  if (filename == NULL) {
-    printf("Pre-condition fileNameExtension(const char * filename): filename is null pointer\n");
+  if (filepath == NULL) {
+    printf("Pre-condition fileExtension(const char * filepath): filepath is null pointer\n");
     return NULL;
   }
 
@@ -25,7 +25,7 @@ char * filenameExtension(const char * filename)
     return NULL;
   }
 
-  statusCode = regexec(&regex, filename, 2, match, 0);
+  statusCode = regexec(&regex, filepath, 2, match, 0);
   if (statusCode != SUCCESS) {
     char errorBuffer[128];
     regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
@@ -44,7 +44,7 @@ char * filenameExtension(const char * filename)
     return NULL;
   }
 
-  memcpy(extension, filename + start, length);
+  memcpy(extension, filepath + start, length);
   extension[length] = '\0';
 
   regfree(&regex);

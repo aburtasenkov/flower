@@ -59,10 +59,10 @@ int executeCommand(const char * command)
   return 1;
 }
 
-bool fileExists(const char * filename) {
-  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+bool fileExists(const char * filepath) {
+  if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
-  if (access(filename, F_OK) == SUCCESS) {
+  if (access(filepath, F_OK) == SUCCESS) {
     return true;
   }
   return false;
@@ -100,18 +100,18 @@ void printFrames(int blockSize, int FPS)
   }
 }
 
-void printVideo(const char * filename, int blockSize, int FPS) 
+void printVideo(const char * filepath, int blockSize, int FPS) 
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 {
-  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+  if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
   if (FPS < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "FPS is smaller than 0 [FPS: %i]", FPS);
 
-  size_t ffmpegCommandSize = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filename) + 1;
+  size_t ffmpegCommandSize = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filepath) + 1;
   char * ffmpegCommand = (char *)malloc(ffmpegCommandSize);
   if (ffmpegCommand == NULL) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for ffmpegCommand [size in bytes: %zu]", ffmpegCommandSize);
-  snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filename);
+  snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filepath);
 
   if (executeCommand("mkdir frames") != SUCCESS) 
   {

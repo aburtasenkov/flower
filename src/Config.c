@@ -8,7 +8,7 @@
 
 OPTIONS loadDefaultConfig() {
   static OPTIONS config;
-  config.filename = NULL;
+  config.filepath = NULL;
   config.FPS = 24;
   config.blockSize = 1; 
   config.output = NULL;
@@ -18,7 +18,7 @@ OPTIONS loadDefaultConfig() {
 void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
   if (argc < ARGC_MIN) printCriticalError(ERROR_BAD_ARGUMENTS, "Arguments not specified");
 
-  config->filename = argv[MEDIAPATH_ARGV_INDEX];
+  config->filepath = argv[MEDIAPATH_ARGV_INDEX];
   for (int i = MEDIAPATH_ARGV_INDEX + 1; i < argc; i++) {
     if (strcmp(argv[i], "-f") == SUCCESS && i + 1 < argc) 
     {

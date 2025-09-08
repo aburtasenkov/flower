@@ -1,7 +1,7 @@
 #pragma once
 
 typedef struct {
-  char * filename;
+  char * filepath;
   int FPS;
   int blockSize;
   char * output;

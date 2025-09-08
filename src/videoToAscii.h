@@ -9,12 +9,12 @@ typedef struct timespec timespec_t;
 int executeCommand(const char * command);
 // Wrapper for system(*command*) calls in order to ease debugging
 
-bool fileExists(const char * filename);
+bool fileExists(const char * filepath);
 
 void printFrames(int blockSize, int FPS);
 // print each frame of a video while accounting for wished FPS
 
-void printVideo(const char * filename, int blockSize, int FPS);
+void printVideo(const char * filepath, int blockSize, int FPS);
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 

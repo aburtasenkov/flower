@@ -8,17 +8,17 @@
 #include <assert.h>
 #include <stdbool.h>
 
-ImageStbi * loadStbi(const char * filename)
+ImageStbi * loadStbi(const char * filepath)
 // create object of ImageStbi class that loads images in format that is supported by stbi
 {
-  if (!filename) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   ImageStbi * stbi = (ImageStbi *)malloc(sizeof(ImageStbi));
   if (!stbi) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
 
   int width, height, Ncomponents;
-  unsigned char * data = stbi_load(filename, &width, &height, &Ncomponents, 0);
-  if (!data) printCriticalError(ERROR_INTERNAL, "Cannot load image [filename: %s]", filename);
+  unsigned char * data = stbi_load(filepath, &width, &height, &Ncomponents, 0);
+  if (!data) printCriticalError(ERROR_INTERNAL, "Cannot load image [filepath: %s]", filepath);
 
   stbi->data = data;
   stbi->width = width;
@@ -61,11 +61,11 @@ unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents)
   return grayscale;
 }
 
-char * createAsciiImage(const char * filename, unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
+char * createAsciiImage(const char * filepath, unsigned char * image, int width, int height, int Ncomponents, int blockSize) 
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 {
-  printf("Converting image %s into ascii grayscale array\n", filename);
+  printf("Converting image %s into ascii grayscale array\n", filepath);
   if (image == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "image is null pointer");
   if (width < 0 || height < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "wrong image Dimensions [width: %i, height: %i]", width, height);
   if (Ncomponents < 1 || Ncomponents > 4) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents needs to be in range [1:4] [Ncomponents: %i]", Ncomponents);
@@ -104,18 +104,18 @@ char * createAsciiImage(const char * filename, unsigned char * image, int width,
   return asciiImage;
 }
 
-void printImage(const char * filename, int blockSize) 
-// convert image located at filename into ascii character array and print it out in terminal
+void printImage(const char * filepath, int blockSize) 
+// convert image located at filepath into ascii character array and print it out in terminal
 {
   // pre-conditions
-  if (filename == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filename is null pointer");
+  if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %i]", blockSize);
 
   // Load image
-  ImageStbi * stbi = loadStbi(filename);
+  ImageStbi * stbi = loadStbi(filepath);
 
   printf("Read image width:%d Height:%d ComponentsSize:%d\n", stbi->width, stbi->height, stbi->Ncomponents);
-  char * asciiImage = createAsciiImage(filename, stbi->data, stbi->width, stbi->height, stbi->Ncomponents, blockSize);
+  char * asciiImage = createAsciiImage(filepath, stbi->data, stbi->width, stbi->height, stbi->Ncomponents, blockSize);
   if (!asciiImage) printNonCriticalError(ERROR_INTERNAL, "can not create ascii image");
   else printf("%s\n", asciiImage);
 
