@@ -1,3 +1,2 @@
 -make padding between glyphs adjustable
--add -o parameter for output in files --> writing ppm format
 -make conversion of ppms to video again
