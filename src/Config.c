@@ -17,8 +17,8 @@ OPTIONS loadDefaultConfig() {
 void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
   if (argc < ARGC_MIN) printCriticalError(ERROR_BAD_ARGUMENTS, "Arguments not specified");
 
-  config->filename = argv[IMAGE_PATH_ARGV_INDEX];
-  for (int i = IMAGE_PATH_ARGV_INDEX + 1; i < argc; i++) {
+  config->filename = argv[MEDIAPATH_ARGV_INDEX];
+  for (int i = MEDIAPATH_ARGV_INDEX + 1; i < argc; i++) {
       if (strcmp(argv[i], "-f") == SUCCESS && i + 1 < argc) {
           config->FPS = atoi(argv[++i]);
       } else if (strcmp(argv[i], "-b") == SUCCESS && i + 1 < argc) {

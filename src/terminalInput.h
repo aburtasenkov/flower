@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #define ARGC_MIN 2
-#define IMAGE_PATH_ARGV_INDEX 1
+#define MEDIAPATH_ARGV_INDEX 1
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
 
