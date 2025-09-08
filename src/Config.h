@@ -4,6 +4,7 @@ typedef struct {
   char * filename;
   int FPS;
   int blockSize;
+  char * output;
 } OPTIONS;
 
 OPTIONS loadDefaultConfig();
