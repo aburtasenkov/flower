@@ -1,2 +1,3 @@
 -make padding between glyphs adjustable
 -make conversion of ppms to video again
+-make code faster so unlimited fps is actually fast
