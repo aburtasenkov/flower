@@ -99,7 +99,8 @@ char * stbiToAscii(ImageStbi * stbi, int blockSize)
       unsigned char averageGray = sum / count;
       asciiImage[idx++] = grayscaleToChar(averageGray);
     }
-    asciiImage[idx++] = '\n';
+    if (by + blockSize < stbi->height)
+      asciiImage[idx++] = '\n';
   }
   asciiImage[idx] = '\0';
   return asciiImage;
