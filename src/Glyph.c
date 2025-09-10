@@ -1,13 +1,14 @@
 
 #include "Glyph.h"
+
 #include "error.h"
 
-#include "ctype.h"
+#include <ctype.h>
 
-uint8_t RGB_WHITE[] = {255, 255, 255};
-uint8_t RGB_BLACK[] = {0, 0, 0};
+const uint8_t RGB_WHITE[RGB_CHANNELS] = {255, 255, 255};
+const uint8_t RGB_BLACK[RGB_CHANNELS] = {0, 0, 0};
 
-// Each row uses the bytes to represent ascii chars in pixel color
+// font data
 const Glyph FONT[] = {
 {' ', {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}},
 {'$', {0b00010000,0b00111000,0b01010000,0b00111000,0b00010100,0b00111000,0b00010000,0b00000000}},
@@ -81,8 +82,7 @@ const Glyph FONT[] = {
 {'.', {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00011000,0b00011000,0b00000000}},
 };
 
-
-const size_t FONT_COUNT = sizeof(FONT) / sizeof(FONT[0]);
+#define FONT_COUNT sizeof(FONT) / sizeof(FONT[0])
 
 const uint8_t * glyphRows(char c) 
 // return binary rows of an ascii char for further image creation
