@@ -18,13 +18,13 @@ void writeImage(const char * filepath, const char * outputPath, int blockSize)
   char * extension = fileExtension(outputPath);
 
   // check if output file format is supported
-  if (strcmp(extension, "ppm") == SUCCESS) 
+  if (strcmp(extension, "ppm") == 0) 
   {
     free(extension);
     writePpm(filepath, outputPath, blockSize);
     return;
   }
-  if (strcmp(extension, "txt") == SUCCESS) 
+  if (strcmp(extension, "txt") == 0) 
   {
     free(extension);
     writeTxt(filepath, outputPath, blockSize);

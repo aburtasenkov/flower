@@ -47,7 +47,7 @@ char * fileExtension(const char * filepath)
 
 bool isVideo(const char * fileExtension) {
   if (!fileExtension) printCriticalError(ERROR_BAD_ARGUMENTS, "fileExtension is null pointer");
-  if (strcmp(fileExtension, "mp4") == SUCCESS) return true;
+  if (strcmp(fileExtension, "mp4") == 0) return true;
   return false;
 }
 

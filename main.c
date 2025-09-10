@@ -33,5 +33,5 @@ int main(int argc, char ** argv) {
 
   free(extension);
 
-  return SUCCESS;
+  return EXIT_SUCCESS;
 }

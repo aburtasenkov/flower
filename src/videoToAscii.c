@@ -36,9 +36,9 @@ int executeCommand(const char * command)
   if (WIFEXITED(statusCode)) {
     int exitCode = WEXITSTATUS(statusCode);
 
-    if (exitCode == SUCCESS) {
+    if (exitCode == 0) {
       printf("\"%s\" ran successfully.\n", command);
-      return SUCCESS;
+      return EXIT_SUCCESS;
     }
 
     printNonCriticalError(exitCode, "\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
@@ -62,7 +62,7 @@ int executeCommand(const char * command)
 bool fileExists(const char * filepath) {
   if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
-  if (access(filepath, F_OK) == SUCCESS) {
+  if (access(filepath, F_OK) == 0) {
     return true;
   }
   return false;
@@ -113,20 +113,20 @@ void printVideo(const char * filepath, int blockSize, int FPS)
   if (ffmpegCommand == NULL) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for ffmpegCommand [size in bytes: %zu]", ffmpegCommandSize);
   snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filepath);
 
-  if (executeCommand("mkdir frames") != SUCCESS) 
+  if (executeCommand("mkdir frames") != 0) 
   {
     printNonCriticalError(ERROR_RUNTIME, "Can not create \"frames\" directory");
     free(ffmpegCommand);
     return;
   }
-  if (executeCommand(ffmpegCommand) != SUCCESS) 
+  if (executeCommand(ffmpegCommand) != 0) 
   {
     printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpegCommand);
     free(ffmpegCommand);
     return;
   }
   
-  if (executeCommand(clearCommand) != SUCCESS) {
+  if (executeCommand(clearCommand) != 0) {
     printNonCriticalError(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
     free(ffmpegCommand);
     return;
@@ -134,7 +134,7 @@ void printVideo(const char * filepath, int blockSize, int FPS)
 
   printFrames(blockSize, FPS);
 
-  if (executeCommand("rm -rf frames") != SUCCESS) {
+  if (executeCommand("rm -rf frames") != 0) {
     printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
   free(ffmpegCommand);
