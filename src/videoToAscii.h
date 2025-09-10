@@ -6,18 +6,18 @@
 
 typedef struct timespec timespec_t;
 
-int executeCommand(const char * command);
+static int executeCommand(const char * command);
 // Wrapper for system(*command*) calls in order to ease debugging
 
-bool fileExists(const char * filepath);
+static bool fileExists(const char * filepath);
 
-void printFrames(int blockSize, int FPS);
+static void printFrames(size_t blockSize, size_t FPS);
 // print each frame of a video while accounting for wished FPS
 
-void printVideo(const char * filepath, int blockSize, int FPS);
+void printVideo(const char * filepath, size_t blockSize, size_t FPS);
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 
-void sleepFrameTimeOffset(int FPS, timespec_t * start, timespec_t * end); 
+static void sleepFrameTimeOffset(size_t FPS, const timespec_t * start, const timespec_t * end); 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
