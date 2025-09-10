@@ -11,7 +11,7 @@
 char * fileExtension(const char * filepath)
 // return the file extension of filepath variable
 {
-  if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   regex_t regex;
   regmatch_t match[2];

@@ -83,7 +83,7 @@ char * stbiToAscii(const ImageStbi * stbi, size_t blockSize)
 void printImage(const char * filepath, size_t blockSize) 
 // convert image located at filepath into ascii character array and print it out in terminal
 {
-  if (filepath == NULL) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   ImageStbi * stbi = loadStbi(filepath);
   printf("Read image width:%zu Height:%zu ComponentsSize:%zu\n", stbi->width, stbi->height, stbi->Ncomponents);
