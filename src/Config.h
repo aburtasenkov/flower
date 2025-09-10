@@ -1,9 +1,11 @@
 #pragma once
 
+#include <stddef.h>
+
 typedef struct {
   char * filepath;
-  int FPS;
-  int blockSize;
+  size_t FPS;
+  size_t blockSize;
   char * output;
 } OPTIONS;
 
