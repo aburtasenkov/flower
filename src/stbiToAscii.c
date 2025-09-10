@@ -7,20 +7,19 @@
 #include <string.h>
 #include <limits.h>
 
-static unsigned char grayscaleToChar(uint8_t grayscaleValue)
+static inline unsigned char grayscaleToChar(uint8_t grayscaleValue)
 // map a value of 0-255 on to an array of grayscale characters and return the character
 {
-  static const char * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  static const size_t sz = 70;
+  static const char Ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+  static const size_t sz = sizeof(Ascii) - 1;
 
   // flatten [0:255] values on [0:sz[ ids
-  size_t index = sz - 1 - grayscaleValue * sz / UCHAR_MAX;
-  if (index >= sz) index = sz - 1; // safety check
+  size_t index = (size_t)((float)grayscaleValue / 255.0f * (sz - 1));
 
   return Ascii[index];
 }
 
-static uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
+static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
   static const float RGB_FACTORS[] = {0.299f, 0.587f, 0.114f};
