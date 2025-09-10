@@ -50,7 +50,7 @@ char * stbiToAscii(ImageStbi * stbi, size_t blockSize)
   size_t outHeight = (stbi->height + blockSize - 1) / blockSize;
 
   char * asciiImage = (char *)malloc(outWidth * outHeight + outHeight + 1); // +height for "\n" and +1 for "\0" characters
-  if (!asciiImage) printCriticalError(ERROR_INTERNAL, "Can not allocate enough memory for asciiImage [size in bytes: %zu]", outWidth * outHeight + outHeight + 1);
+  if (!asciiImage) printCriticalError(ERROR_RUNTIME, "Can not allocate enough memory for asciiImage [size in bytes: %zu]", outWidth * outHeight + outHeight + 1);
   size_t idx = 0;
 
   // iterate over each pixel

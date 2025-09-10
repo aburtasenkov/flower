@@ -4,9 +4,8 @@
 #include <stdlib.h>
 
 #define ERROR_BAD_ARGUMENTS 1
-#define ERROR_INTERNAL 2
-#define ERROR_EXTERNAL 3
-#define ERROR_RUNTIME 4
+#define ERROR_EXTERNAL 2
+#define ERROR_RUNTIME 3
 
 #define printCriticalError(ERROR_CODE, fmt, ...) \
     do { \

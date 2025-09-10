@@ -48,7 +48,7 @@ void writePpm(const char * filepath, const char * outputPath, int blockSize)
   if (!stbi) printCriticalError(ERROR_RUNTIME, "Error loading image [filepath: %s]", filepath);
 
   unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
-  if (!asciiImage) printCriticalError(ERROR_INTERNAL, "Error converting image to ascii format");
+  if (!asciiImage) printCriticalError(ERROR_RUNTIME, "Error converting image to ascii format");
   
   // write to file
   asciiToPpm(asciiImage, outputPath);
@@ -69,7 +69,7 @@ void writeTxt(const char * filepath, const char * outputPath, int blockSize)
   if (!stbi) printCriticalError(ERROR_RUNTIME, "Error loading image [filepath: %s]", filepath);
 
   unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
-  if (!asciiImage) printCriticalError(ERROR_INTERNAL, "Error converting image to ascii format");
+  if (!asciiImage) printCriticalError(ERROR_RUNTIME, "Error converting image to ascii format");
   
   // write to file
   FILE * txt = fopen(outputPath, "w");
