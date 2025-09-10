@@ -106,7 +106,7 @@ static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth,
         for (size_t glyphRow = 0; glyphRow < GLYPH_H; ++glyphRow) {
             uint8_t pixels = pixelRows[glyphRow];
             for (size_t glyphColumn = 0; glyphColumn < GLYPH_W; ++glyphColumn) {
-                if (pixels << glyphColumn & MOST_SIGNIFICANT_BIT) {
+                if (pixels << glyphColumn & GLYPH_MOST_SIGNIFICANT_BIT) {
                     setPixel(ppm, pen_x + glyphColumn, pen_y + glyphRow, RGB_BLACK);
                 }
             }
