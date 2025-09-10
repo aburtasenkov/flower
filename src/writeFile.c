@@ -8,13 +8,13 @@
 
 #include <string.h>
 
-void writeImage(const char * filepath, const char * outputPath, int blockSize)
+void writeImage(const char * filepath, const char * outputPath, size_t blockSize)
 // convert image at filepath to ascii and write the resulting image in outputPath
 // if file format is not supported, function will cause an error
 {
   if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (!outputPath) printCriticalError(ERROR_BAD_ARGUMENTS, "outputPath is null pointer");
-  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %i]", blockSize);
+  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %zu]", blockSize);
 
   char * extension = fileExtension(outputPath);
 
@@ -36,42 +36,32 @@ void writeImage(const char * filepath, const char * outputPath, int blockSize)
   //didn't forget "free(extension);", its just not needed as printCriticalError will stop control flow and OS will cleanup
 }
 
-void writePpm(const char * filepath, const char * outputPath, int blockSize)
+static void writePpm(const char * filepath, const char * outputPath, size_t blockSize)
 // convert image at filepath to ppm file
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (!outputPath) printCriticalError(ERROR_BAD_ARGUMENTS, "outputPath is null pointer");
-  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %i]", blockSize);
-
   // load stbi image and convert it to ascii
   ImageStbi * stbi = loadStbi(filepath);
-
   unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
-  
-  // write to file
-  asciiToPpm(asciiImage, outputPath);
-
   freeStbi(stbi);
+  
+  asciiToPpm(asciiImage, outputPath);
   free(asciiImage);
 }
 
-void writeTxt(const char * filepath, const char * outputPath, int blockSize)
+static void writeTxt(const char * filepath, const char * outputPath, size_t blockSize)
 // convert image at filepath to txt file
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (!outputPath) printCriticalError(ERROR_BAD_ARGUMENTS, "outputPath is null pointer");
-  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize < 1 [blockSize: %i]", blockSize);
-
   // load stbi image and convert it to ascii image
   ImageStbi * stbi = loadStbi(filepath);
-
   unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
+  freeStbi(stbi);
   
-  // write to file
   FILE * txt = fopen(outputPath, "w");
   fprintf(txt, "%s", asciiImage);
-  fclose(txt);
+  if (fclose(txt) != 0) 
+  {
+    perror("fclose");
+  }
   
-  freeStbi(stbi);
   free(asciiImage);
 }
