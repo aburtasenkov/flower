@@ -1,13 +1,17 @@
-#include <limits.h>
+#include "grayscale.h"
 
-unsigned char grayscaleToChar(unsigned char grayScaleValue)
+#include <limits.h>
+#include <string.h>
+
+unsigned char grayscaleToChar(uint8_t grayscaleValue)
 // map a value of 0-255 on to an array of grayscale characters and return the character
 {
-  static const char const * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  static const int AsciiSize = 70; // size of Ascii Array
+  static const char * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+  const size_t sz = strlen(Ascii);
 
   // flatten [0:255] values on [0:69] ids
-  unsigned char idx = AsciiSize - 1 - grayScaleValue * AsciiSize / UCHAR_MAX;
+  size_t index = sz - 1 - grayscaleValue * sz / UCHAR_MAX;
+  if (index >= sz) index = sz - 1; // safety check
 
-  return Ascii[idx];
+  return Ascii[index];
 }
