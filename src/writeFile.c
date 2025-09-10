@@ -1,5 +1,6 @@
 #include "writeFile.h"
 
+#include "ImageStbi.h"
 #include "stbiToAscii.h"
 #include "asciiToPpm.h"
 #include "terminalInput.h"

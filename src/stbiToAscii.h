@@ -1,26 +1,18 @@
 #pragma once 
 
-typedef struct {
-    unsigned char * data;
-    int width;
-    int height;
-    int Ncomponents;
-} ImageStbi;
+#include "ImageStbi.h"
 
-ImageStbi * loadStbi(const char * filepath);
-// create object of ImageStbi class that loads images in format that is supported by stbi
+#include <stdint.h>
 
-void freeStbi(ImageStbi * image);
+static unsigned char grayscaleToChar(uint8_t grayscaleValue);
+// map a value of 0-255 on to an array of grayscale characters and return the character
 
-unsigned char rgbToGrayscale(unsigned char * pixel, int Ncomponents);
+static uint8_t rgbToGrayscale(unsigned char * pixel, size_t Ncomponents);
 // convert single or multichannel pixel to grayscale value [0:255]
 
-char * stbiToAscii(ImageStbi * stbi, int blockSize);
+char * stbiToAscii(ImageStbi * stbi, size_t blockSize);
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 
-void printImage(const char * filepath, int blockSize);
+void printImage(const char * filepath, size_t blockSize);
 // convert image located at filepath into ascii character array and print it out in terminal
-
-void printImageFPS(const char * filepath, int blockSize, int FPS);
-// wrap printing image with FPS control
