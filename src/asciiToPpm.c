@@ -6,39 +6,35 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int countRows(const char * ascii) 
+static size_t countRows(const char * ascii) 
 // return amount of y coordinates in ascii image format
 {
-    if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
-
-    int count = 1; // At least one row
+    size_t count = 1; // At least one row
     while (*ascii != '\0') {
         if (*ascii == '\n') ++count;
         ++ascii;
     }
 
-    if (count < 1) printCriticalError(ERROR_RUNTIME, "Row count less than 1 [count: %d]", count);
+    if (count < 1) printCriticalError(ERROR_RUNTIME, "Row count less than 1 [count: %zu]", count);
 
     return count;
 }
 
-int countColumns(const char * ascii)
+static size_t countColumns(const char * ascii)
 // return amount of x coordinates in ascii image format
 {
-    if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
-
-    int count = 0;
+    size_t count = 0;
     while (*ascii != '\0' && *ascii != '\n') {
         ++count;
         ++ascii;
     }
 
-    if (count < 1) printCriticalError(ERROR_RUNTIME, "Column count less than 1 [count: %d]", count);
+    if (count < 1) printCriticalError(ERROR_RUNTIME, "Column count less than 1 [count: %zu]", count);
 
     return count;
 }
 
-ImagePPM * createPPM(size_t x, size_t y)
+static ImagePPM * createPPM(size_t x, size_t y)
 // create object of ImagePPM class
 {
     if (x < 1 || y < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid image dimensions [x: %zu, y: %zu]", x, y);
@@ -56,81 +52,60 @@ ImagePPM * createPPM(size_t x, size_t y)
     return ppm;
 }
 
-void freePPM(ImagePPM * ppm) {
+static void freePPM(ImagePPM * ppm) {
     if (!ppm) return;
-    if (!ppm->data) { free(ppm); return; }
 
     free(ppm->data);
     free(ppm);
 }
 
-void setPixel(ImagePPM * ppm, int x, int y, const uint8_t * rgb)
+static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_ARRAY_SIZE])
 // set pixel at (x,y) to rgb value
 {
-    if (!ppm) printCriticalError(ERROR_BAD_ARGUMENTS, "ppm is null pointer");
-    if (!ppm->data) printCriticalError(ERROR_BAD_ARGUMENTS, "ppm->data is null pointer");
     if (!rgb) printCriticalError(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
-    if (ppm->x < 1 || ppm->y < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid image dimensions");
-    if (x < 0 || x >= (int)ppm->x) printCriticalError(ERROR_BAD_ARGUMENTS, "x coordinate out of bounds [x: %d, width: %zu]", x, ppm->x);
-    if (y < 0 || y >= (int)ppm->y) printCriticalError(ERROR_BAD_ARGUMENTS, "y coordinate out of bounds [y: %d, height: %zu]", y, ppm->y);
 
-    int index = (y * ppm->x + x) * RGB_CHANNELS;
+    size_t index = (y * ppm->x + x) * RGB_CHANNELS;
     size_t max_index = ppm->x * ppm->y * RGB_CHANNELS;
-    if (index < 0 || index + 2 >= (int)max_index) printCriticalError(ERROR_RUNTIME, "Pixel index out of bounds [index: %d, max: %zu]", index + 2, max_index);
+    if (index + 2 >= max_index) printCriticalError(ERROR_RUNTIME, "Pixel index out of bounds [index: %zu, max: %zu]", index + 2, max_index);
 
     ppm->data[index + 0] = rgb[0];
     ppm->data[index + 1] = rgb[1];
     ppm->data[index + 2] = rgb[2];
 }
 
-ImagePPM * convertAsciiToPpmBinary(const char * ascii, int asciiWidth, int asciiHeight) {
-    if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
-    if (asciiWidth < 1 || asciiHeight < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid ascii dimensions [asciiWidth: %d, asciiHeight: %d]", asciiWidth, asciiHeight);
-
-    int imageSizeX = GLYPH_W * asciiWidth + (asciiWidth - 1) * PADDING;
-    int imageSizeY = GLYPH_H  * asciiHeight + (asciiHeight - 1) * PADDING;
-    int imageSize = imageSizeX * imageSizeY * RGB_CHANNELS;
+static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth, size_t asciiHeight) {
+    size_t imageSizeX = GLYPH_W * asciiWidth + (asciiWidth - 1) * PADDING;
+    size_t imageSizeY = GLYPH_H  * asciiHeight + (asciiHeight - 1) * PADDING;
+    size_t imageSize = imageSizeX * imageSizeY * RGB_CHANNELS;
     ImagePPM * ppm = createPPM(imageSizeX, imageSizeY);
-    if (!ppm) printCriticalError(ERROR_RUNTIME, "Failed to create ppm image object");
 
     // initialize all pixels to white
-    for (int i = 0; i < imageSize; ++i) ppm->data[i] = 255;
+    for (size_t i = 0; i < imageSize; ++i) ppm->data[i] = 255;
 
     // pixel on which the drawing "pen" currently is
-    int pen_x = 0, pen_y = 0;
-
-    // col and row are used just for identifying if padding is needed
-    int col = 0, row = 0;
+    size_t pen_x = 0, pen_y = 0;
 
     // iterate over each character
-    for (int i = 0; ascii[i] != '\0'; ++i) {
+    for (size_t i = 0; ascii[i] != '\0'; ++i) {
         // move "pen" to start of line
         if (ascii[i] == '\n') {
             pen_x = 0;
-            pen_y += GLYPH_H;
-
-            // add vertical padding between characters
-            if (row < asciiHeight) pen_y += PADDING;
-            col = 0;
-
+            pen_y += GLYPH_H + PADDING;
             continue;
         }
 
         // get current row of pixels and iterate over it
         const uint8_t* pixelRows = glyphRows(ascii[i]);
 
-        for (int glyphRow = 0; glyphRow < GLYPH_H; ++glyphRow) {
+        for (size_t glyphRow = 0; glyphRow < GLYPH_H; ++glyphRow) {
             uint8_t pixels = pixelRows[glyphRow];
-            for (int glyphColumn = 0; glyphColumn < GLYPH_W; ++glyphColumn) {
+            for (size_t glyphColumn = 0; glyphColumn < GLYPH_W; ++glyphColumn) {
                 if (pixels << glyphColumn & MOST_SIGNIFICANT_BIT) {
                     setPixel(ppm, pen_x + glyphColumn, pen_y + glyphRow, RGB_BLACK);
                 }
             }
         }
-        pen_x += GLYPH_W;
-
-        // add horizontal padding between characters
-        if (col < asciiWidth) pen_x += PADDING;
+        pen_x += GLYPH_W + PADDING;
     }
     return ppm;
 }
@@ -142,7 +117,6 @@ void asciiToPpm(const char * ascii, const char * filepath)
     if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
     ImagePPM * ppm = convertAsciiToPpmBinary(ascii, countColumns(ascii), countRows(ascii));
-    if (!ppm) printCriticalError(ERROR_RUNTIME, "convertAsciiToPpmBinary returned null pointer");
 
     FILE *f = fopen(filepath, "wb");
     if (!f) {
@@ -159,6 +133,8 @@ void asciiToPpm(const char * ascii, const char * filepath)
         return;
     }
 
-    fclose(f);
+    if (fclose(f) != 0) {
+        perror("fclose");
+    }
     freePPM(ppm);
 }
