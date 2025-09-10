@@ -7,10 +7,10 @@
 static unsigned char grayscaleToChar(uint8_t grayscaleValue);
 // map a value of 0-255 on to an array of grayscale characters and return the character
 
-static uint8_t rgbToGrayscale(unsigned char * pixel, size_t Ncomponents);
+static uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents);
 // convert single or multichannel pixel to grayscale value [0:255]
 
-char * stbiToAscii(ImageStbi * stbi, size_t blockSize);
+char * stbiToAscii(const ImageStbi * stbi, size_t blockSize);
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 

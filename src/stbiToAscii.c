@@ -20,7 +20,7 @@ static unsigned char grayscaleToChar(uint8_t grayscaleValue)
   return Ascii[index];
 }
 
-static uint8_t rgbToGrayscale(unsigned char * pixel, size_t Ncomponents) 
+static uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
   if (!pixel) printCriticalError(ERROR_BAD_ARGUMENTS, "pixel is null pointer");
@@ -37,7 +37,7 @@ static uint8_t rgbToGrayscale(unsigned char * pixel, size_t Ncomponents)
   return (uint8_t)gray;
 }
 
-char * stbiToAscii(ImageStbi * stbi, size_t blockSize) 
+char * stbiToAscii(const ImageStbi * stbi, size_t blockSize) 
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
 {
