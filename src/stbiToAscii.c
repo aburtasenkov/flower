@@ -11,9 +11,9 @@ static unsigned char grayscaleToChar(uint8_t grayscaleValue)
 // map a value of 0-255 on to an array of grayscale characters and return the character
 {
   static const char * Ascii = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  const size_t sz = strlen(Ascii);
+  static const size_t sz = 70;
 
-  // flatten [0:255] values on [0:69] ids
+  // flatten [0:255] values on [0:sz[ ids
   size_t index = sz - 1 - grayscaleValue * sz / UCHAR_MAX;
   if (index >= sz) index = sz - 1; // safety check
 
@@ -23,9 +23,6 @@ static unsigned char grayscaleToChar(uint8_t grayscaleValue)
 static uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
-  if (!pixel) printCriticalError(ERROR_BAD_ARGUMENTS, "pixel is null pointer");
-  if (!(Ncomponents > 0 && Ncomponents < 5)) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents is not in range [1:4] [Ncomponents: %zu]", Ncomponents);
-
   static const float RGB_FACTORS[] = {0.299f, 0.587f, 0.114f};
   
   if (Ncomponents == 1 || Ncomponents == 2) return pixel[0];
@@ -40,12 +37,8 @@ static uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents)
 char * stbiToAscii(const ImageStbi * stbi, size_t blockSize) 
 // create array of ascii characters
 // this array includes \n and \o for newlines and end of string
+// no checks and therefore the caller must ensure stbi is valid pointer
 {
-  if (!stbi) printCriticalError(ERROR_BAD_ARGUMENTS, "stbi is null pointer");
-  if (!stbi->data) printCriticalError(ERROR_BAD_ARGUMENTS, "stbi->data is null pointer");
-  if (stbi->width < 0 || stbi->height < 0) printCriticalError(ERROR_BAD_ARGUMENTS, "wrong image Dimensions [width: %zu, height: %zu]", stbi->width, stbi->height);
-  if (stbi->Ncomponents < 1 || stbi->Ncomponents > 4) printCriticalError(ERROR_BAD_ARGUMENTS, "Ncomponents needs to be in range [1:4] [Ncomponents: %zu]", stbi->Ncomponents);
-
   size_t outWidth = (stbi->width + blockSize - 1) / blockSize;
   size_t outHeight = (stbi->height + blockSize - 1) / blockSize;
 
