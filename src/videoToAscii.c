@@ -88,47 +88,42 @@ static void printFrames(size_t blockSize, size_t FPS)
   timespec_t start, end;
   bool UNLIMITED_FPS = FPS == 0 ? true : false;
 
-  timespec_t START, END;
-  size_t frames = 0;
-  clock_gettime(CLOCK_MONOTONIC, &START);
+  // count frames and cache them
+  size_t capacity = 128;
+  size_t sz = 0;
+  char ** asciiFrames = (char **)malloc(capacity * sizeof(char *));
 
-  size_t filepathSize = sizeof(filepath);
-
-  // frames start at 0001
-  for (size_t i = 1; i <= MAX_FRAMES; ++i) {
-    clock_gettime(CLOCK_MONOTONIC, &start);
-
-    // Format the filepath for the current frame
-    snprintf(filepath, filepathSize, "frames/frame_%04zu.jpg", i);
+  for (size_t i = 1; i < MAX_FRAMES; ++i)
+  {
+    snprintf(filepath, sizeof(filepath), "frames/frame_%04zu.jpg", i);
     if (!fileExists(filepath)) break;
 
-    // Move cursor to the top left corner of the terminal and print the frame
-    printf("\033[H");
+    if (sz >= capacity) 
+    {
+      capacity *= 2;
+      asciiFrames = (char **)realloc(asciiFrames, capacity * sizeof(char *));
+    }
 
     ImageStbi * stbi = loadStbi(filepath);
     char * ascii = stbiToAscii(stbi, blockSize);
     freeStbi(stbi);
 
-    printf("%s", ascii);
+    asciiFrames[sz++] = ascii;
+  }
 
-    free(ascii);
+  // draw individual frames
+  for (size_t i = 0; i < sz; ++i) {
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    // Move cursor to the top left corner of the terminal and print the frame
+    printf("\033[H");
+    printf("%s", asciiFrames[i]);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     if (!UNLIMITED_FPS) {
       sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
     }
-    frames++;
-  }
-  clock_gettime(CLOCK_MONOTONIC, &END);
-  double elapsed = (END.tv_sec - START.tv_sec) +
-                   (END.tv_nsec - START.tv_nsec) / NANOSECONDS_IN_SECOND;
-
-  if (elapsed > 0 && frames > 0) {
-    double actualFPS = frames / elapsed;
-    printf("\n\nDisplayed %zu frames in %.2f seconds (%.2f FPS)\n", frames, elapsed, actualFPS);
-  } else {
-    printf("\n\nNo frames displayed.\n");
   }
 }
 
