@@ -1,5 +1,5 @@
 #include "videoToAscii.h"
-#include "imageToAscii.h"
+#include "stbiToAscii.h"
 
 #include "error.h"
 

@@ -1,6 +1,6 @@
 #include "writeFile.h"
 
-#include "imageToAscii.h"
+#include "stbiToAscii.h"
 #include "asciiToPpm.h"
 #include "terminalInput.h"
 #include "error.h"

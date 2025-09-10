@@ -1,4 +1,4 @@
-#include "src/imageToAscii.h"
+#include "src/stbiToAscii.h"
 #include "src/videoToAscii.h"
 #include "src/Config.h"
 #include "src/terminalInput.h"

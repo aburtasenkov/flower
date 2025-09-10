@@ -1,4 +1,4 @@
-#include "imageToAscii.h"
+#include "stbiToAscii.h"
 
 #include "error.h"
 #include "grayscale.h"
