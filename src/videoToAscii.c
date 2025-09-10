@@ -36,7 +36,7 @@ int executeCommand(const char * command)
   if (WIFEXITED(statusCode)) {
     int exitCode = WEXITSTATUS(statusCode);
 
-    if (exitCode == 0) {
+    if (exitCode == EXIT_SUCCESS) {
       printf("\"%s\" ran successfully.\n", command);
       return EXIT_SUCCESS;
     }
