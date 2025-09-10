@@ -13,8 +13,7 @@ int main(int argc, char ** argv) {
   readTerminalArguments(&config, argc, argv);
 
   char * extension = fileExtension(config.filepath);
-  if (!extension) printCriticalError(ERROR_BAD_ARGUMENTS, "No file extension found in %s", config.filepath);
-  else printf("File Extension: %s\n", extension);
+  printf("File Extension: %s\n", extension);
 
   /*-----------------------Execute code-----------------------*/
 
