@@ -3,10 +3,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define PADDING 10
-
-#define RGB_ARRAY_SIZE 3
-
 static size_t countRows(const char * ascii);
 // return amount of y coordinates in ascii image format
 
@@ -24,7 +20,7 @@ static ImagePPM * createPPM(size_t x, size_t y);
 
 static void freePPM(ImagePPM * ppm);
 
-static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_ARRAY_SIZE]);
+static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[]);
 // set pixel at (x,y) to rgb value
 
 static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth, size_t asciiHeight);
