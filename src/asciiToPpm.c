@@ -87,8 +87,8 @@ ImagePPM * convertAsciiToPpmBinary(const char * ascii, int asciiWidth, int ascii
     if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
     if (asciiWidth < 1 || asciiHeight < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid ascii dimensions [asciiWidth: %d, asciiHeight: %d]", asciiWidth, asciiHeight);
 
-    int imageSizeX = GLYPH_W * asciiWidth;
-    int imageSizeY = GLYPH_H  * asciiHeight;
+    int imageSizeX = GLYPH_W * asciiWidth + (asciiWidth - 1) * PADDING;
+    int imageSizeY = GLYPH_H  * asciiHeight + (asciiHeight - 1) * PADDING;
     int imageSize = imageSizeX * imageSizeY * RGB_CHANNELS;
     ImagePPM * ppm = createPPM(imageSizeX, imageSizeY);
     if (!ppm) printCriticalError(ERROR_RUNTIME, "Failed to create ppm image object");
@@ -97,8 +97,10 @@ ImagePPM * convertAsciiToPpmBinary(const char * ascii, int asciiWidth, int ascii
     for (int i = 0; i < imageSize; ++i) ppm->data[i] = 255;
 
     // pixel on which the drawing "pen" currently is
-    int pen_x = 0;
-    int pen_y = 0;
+    int pen_x = 0, pen_y = 0;
+
+    // col and row are used just for identifying if padding is needed
+    int col = 0, row = 0;
 
     // iterate over each character
     for (int i = 0; ascii[i] != '\0'; ++i) {
@@ -106,6 +108,11 @@ ImagePPM * convertAsciiToPpmBinary(const char * ascii, int asciiWidth, int ascii
         if (ascii[i] == '\n') {
             pen_x = 0;
             pen_y += GLYPH_H;
+
+            // add vertical padding between characters
+            if (row < asciiHeight) pen_y += PADDING;
+            col = 0;
+
             continue;
         }
 
@@ -121,6 +128,9 @@ ImagePPM * convertAsciiToPpmBinary(const char * ascii, int asciiWidth, int ascii
             }
         }
         pen_x += GLYPH_W;
+
+        // add horizontal padding between characters
+        if (col < asciiWidth) pen_x += PADDING;
     }
     return ppm;
 }

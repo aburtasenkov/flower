@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define PADDING 0
+
 int countRows(const char * ascii);
 // return amount of y coordinates in ascii image format
 
