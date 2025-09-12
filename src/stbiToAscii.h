@@ -4,11 +4,11 @@
 
 #include <stdint.h>
 
-static inline unsigned char grayscaleToChar(uint8_t grayscaleValue);
-// map a value of 0-255 on to an array of grayscale characters and return the character
-
 static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents);
 // convert single or multichannel pixel to grayscale value [0:255]
+
+static inline unsigned char grayscaleToChar(uint8_t grayscaleValue);
+// map a value of 0-255 on to an array of grayscale characters and return the character
 
 char * stbiToAscii(const ImageStbi * stbi, size_t blockSize);
 // create array of ascii characters

@@ -7,18 +7,6 @@
 #include <string.h>
 #include <limits.h>
 
-static inline unsigned char grayscaleToChar(uint8_t grayscaleValue)
-// map a value of 0-255 on to an array of grayscale characters and return the character
-{
-  static const char Ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  static const size_t sz = sizeof(Ascii) - 1;
-
-  // flatten [0:255] values on [0:sz[ ids
-  size_t index = (size_t)((float)grayscaleValue / 255.0f * (sz - 1));
-
-  return Ascii[index];
-}
-
 static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
@@ -31,6 +19,18 @@ static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncompon
     gray += pixel[i] * RGB_FACTORS[i];
   }
   return (uint8_t)gray;
+}
+
+static inline unsigned char grayscaleToChar(uint8_t grayscaleValue)
+// map a value of 0-255 on to an array of grayscale characters and return the character
+{
+  static const char Ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+  static const size_t sz = sizeof(Ascii) - 1;
+
+  // flatten [0:255] values on [0:sz[ ids
+  size_t index = (size_t)((float)grayscaleValue / 255.0f * (sz - 1));
+
+  return Ascii[index];
 }
 
 char * stbiToAscii(const ImageStbi * stbi, size_t blockSize) 
