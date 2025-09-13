@@ -4,22 +4,19 @@ Why is if called flower?
 
 -I wanted to send my girlfriend an ascii flower.
 
-Flower is a C-based tool that converts **images and videos into ASCII art**, viewable directly in your terminal or exportable to a file. Built for speed, simplicity, and fun, this project demonstrates system-level programming, multimedia handling, and creative visualization.
+Flower is a C-based tool that converts **images and videos into ASCII**, viewable directly in your terminal or exportable to a file. Built for speed, simplicity, and fun, this project demonstrates multimedia handling, and creative optimization.
 
-## 🚀 Features
+## Dependencies
 
-* **Image to ASCII** – Render static images as ASCII art
-* **Video to ASCII** – Play videos as ASCII animations in your terminal
-* **Output to File** – Save ASCII art
-* **Configurable** – Adjust block size, FPS, and output
-* **Modular Codebase** – Organized source files for clarity and maintainability
+* [stbi_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (already included in src directory)
+* ffmpeg for extracting invidivual frames from .mp4 videos
 
-## 🛠️ Tech Stack
+## Features
 
-* **Language:** C (ANSI C)
-* **Tools:** GCC/Clang, Bash (for build)
-* **Concepts:** File I/O, command-line argument parsing, multimedia processing, terminal rendering
-
+* Converting static images to ASCII arrays of characters, depending on colors of corresponding pixels
+* Displaying these images in terminal
+* Displaying videos in terminal as ACSII images
+  
 ## 📦 Getting Started
 
 ### Prerequisites
@@ -55,7 +52,7 @@ Run the program with an image or video file:
 
 ### Options
 
-* `-b <size>` : Set block size (controls ASCII resolution)
+* `-b <size>` : Set block size (controls ASCII resolution, e.g. 30 means one ASCII character is average of a 30x30 pixel block)
 * `-f <fps>`  : Frames per second (for videos)
 * `-o <file>` : Write ASCII output to a file
 
@@ -87,20 +84,6 @@ Play a video in ASCII:
 ./main video.mp4 -b 8 -f 15
 ```
 
-## 📂 Project Structure
-
-```
-├── compile.sh      # Build script
-├── main.c          # Program entry point
-├── src/            # Core source code
-│   ├── imageToAscii.c
-│   ├── videoToAscii.c
-│   ├── Config.h
-│   ├── ...
-├── todo            # Development notes
-└── README.md       # Project documentation
-```
-
 ## 📈 Roadmap
 
 * [ ] Windows support
@@ -114,8 +97,8 @@ Developed by **Anton burtasenkov** – part of my [GitHub Portfolio](https://git
 
 * Low-level programming with C
 * Command-line application design
-* Multimedia processing and visualization
 * Modular software architecture
+* Code optimization
 
 ## 📜 License
 
