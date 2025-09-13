@@ -23,6 +23,8 @@
 #define clearCommand "clear"
 #endif
 
+// #define DEBUG
+
 static int executeCommand(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
 {
