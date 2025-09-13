@@ -17,7 +17,7 @@ Flower is a C-based tool that converts **images and videos into ASCII**, viewabl
 * Displaying these images in terminal
 * Displaying videos in terminal as ACSII images
   
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -72,6 +72,11 @@ Using blocksize for scaling:
 ./main sample.png -b 30
 ```
 
+Result:
+
+<img width="460" height="911" alt="image" src="https://github.com/user-attachments/assets/421d7761-583a-456d-8fb3-5c26d7d07b44" />
+
+
 Save ASCII art to a file:
 
 ```bash
@@ -91,7 +96,7 @@ Play a video in ASCII:
 * [ ] Interactive playback controls
 * [ ] Support for additional codecs
 
-## 🧑‍💻 Author
+## Author
 
 Developed by **Anton burtasenkov** – part of my [GitHub Portfolio](https://github.com/aburtasenkov). This project highlights my skills in:
 
@@ -100,6 +105,6 @@ Developed by **Anton burtasenkov** – part of my [GitHub Portfolio](https://git
 * Modular software architecture
 * Code optimization
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
