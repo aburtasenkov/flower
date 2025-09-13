@@ -7,6 +7,27 @@
 #include <string.h>
 #include <limits.h>
 
+static unsigned char GrayscaleToAsciiHashmap[UINT8_MAX + 1] = {0};
+
+static void precomputeGrayscaleAsciiHashmap()
+// create hash map for each value to avoid recalculating ascii characters with same grayscale value
+{
+  for (size_t i = 0; i <= UINT8_MAX; ++i)
+    GrayscaleToAsciiHashmap[i] = computeGrayscaleToChar((uint8_t)i);
+}
+
+static inline unsigned char computeGrayscaleToChar(uint8_t grayscaleValue)
+// map a value of 0-255 on to an array of grayscale characters and return the character
+{
+  static const char ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
+  static const size_t sz = sizeof(ascii) - 1;
+
+  // flatten [0:255] values on [0:sz[ ids
+  size_t index = (size_t)((float)grayscaleValue / 255.0f * (sz - 1));
+
+  return ascii[index];
+}
+
 static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncomponents) 
 // convert single or multichannel pixel to grayscale value [0:255]
 {
@@ -22,15 +43,9 @@ static inline uint8_t rgbToGrayscale(const unsigned char * pixel, size_t Ncompon
 }
 
 static inline unsigned char grayscaleToChar(uint8_t grayscaleValue)
-// map a value of 0-255 on to an array of grayscale characters and return the character
+// retrieve pre computed ascii characters
 {
-  static const char Ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
-  static const size_t sz = sizeof(Ascii) - 1;
-
-  // flatten [0:255] values on [0:sz[ ids
-  size_t index = (size_t)((float)grayscaleValue / 255.0f * (sz - 1));
-
-  return Ascii[index];
+  return GrayscaleToAsciiHashmap[grayscaleValue];
 }
 
 char * stbiToAscii(const ImageStbi * stbi, size_t blockSize) 
@@ -52,8 +67,8 @@ char * stbiToAscii(const ImageStbi * stbi, size_t blockSize)
       size_t sum = 0;
       size_t count = 0;
 
-      for (int y = 0; y < blockSize && (by + y) < stbi->height; ++y) {
-        for (int x = 0; x < blockSize && (bx + x) < stbi->width; ++x) {
+      for (size_t y = 0; y < blockSize && (by + y) < stbi->height; ++y) {
+        for (size_t x = 0; x < blockSize && (bx + x) < stbi->width; ++x) {
           unsigned char * currentPixel = stbi->data + ((by + y) * stbi->width + bx + x) * stbi->Ncomponents;
 
           unsigned char grayscaleValue = rgbToGrayscale(currentPixel, stbi->Ncomponents);
@@ -65,8 +80,7 @@ char * stbiToAscii(const ImageStbi * stbi, size_t blockSize)
       unsigned char averageGray = sum / count;
       asciiImage[idx++] = grayscaleToChar(averageGray);
     }
-    if (by + blockSize < stbi->height)
-      asciiImage[idx++] = '\n';
+    asciiImage[idx++] = '\n';
   }
   asciiImage[idx] = '\0';
   return asciiImage;
@@ -84,6 +98,6 @@ void printImage(const char * filepath, size_t blockSize)
   char * asciiImage = stbiToAscii(stbi, blockSize);
   freeStbi(stbi);
 
-  printf("%s\n", asciiImage);
+  printf("%s", asciiImage);
   free(asciiImage);
 }

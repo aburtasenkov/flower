@@ -85,19 +85,20 @@ static void printFrames(size_t blockSize, size_t FPS)
 // print each frame of a video while accounting for wished FPS
 {
   char filepath[22];
-  timespec_t start, end;
   bool UNLIMITED_FPS = FPS == 0 ? true : false;
-
+  
   // count frames and cache them
   size_t capacity = 128;
   size_t sz = 0;
   char ** asciiFrames = (char **)malloc(capacity * sizeof(char *));
-
+  
   for (size_t i = 1; i < MAX_FRAMES; ++i)
   {
     snprintf(filepath, sizeof(filepath), "frames/frame_%04zu.jpg", i);
     if (!fileExists(filepath)) break;
 
+    printf("\033[HProcessing frame #%04zu\n", i);
+    
     if (sz >= capacity) 
     {
       capacity *= 2;
@@ -110,14 +111,20 @@ static void printFrames(size_t blockSize, size_t FPS)
 
     asciiFrames[sz++] = ascii;
   }
+    
+// if debugging -> print real fps shown
+#ifdef DEBUG
+timespec_t t0, t1;
+clock_gettime(CLOCK_MONOTONIC, &t0);
+#endif
 
   // draw individual frames
+  timespec_t start, end;
   for (size_t i = 0; i < sz; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Move cursor to the top left corner of the terminal and print the frame
-    printf("\033[H");
-    printf("%s", asciiFrames[i]);
+    printf("\033[H%s", asciiFrames[i]);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -125,6 +132,21 @@ static void printFrames(size_t blockSize, size_t FPS)
       sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
     }
   }
+
+#ifdef DEBUG
+clock_gettime(CLOCK_MONOTONIC, &t1);
+double elapsed = (t1.tv_sec - t0.tv_sec) + (t1.tv_nsec - t0.tv_nsec) / NANOSECONDS_IN_SECOND;
+
+double fps = (double)sz / elapsed;
+printf("Displayed %zu frames in %.3f seconds (%.2f FPS)\n", sz, elapsed, fps);
+#endif
+
+  // free all frames
+  for (size_t i = 0; i < sz; ++i) 
+  {
+    free(asciiFrames[i]);
+  }
+  free(asciiFrames);
 }
 
 void printVideo(const char * filepath, size_t blockSize, size_t FPS) 

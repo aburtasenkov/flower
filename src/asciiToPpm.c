@@ -23,7 +23,7 @@ static size_t countRows(const char * ascii)
 
     if (count < 1) printCriticalError(ERROR_RUNTIME, "Row count less than 1 [count: %zu]", count);
 
-    return count;
+    return count - 1;
 }
 
 static size_t countColumns(const char * ascii)
