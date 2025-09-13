@@ -1,4 +1,4 @@
-# flower
+# flower - Terminal Multimedia Player
 
 Why is if called flower?
 
