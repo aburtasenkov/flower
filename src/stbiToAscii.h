@@ -7,7 +7,7 @@
 
 // only support linux currently
 __attribute__((constructor))
-static void precomputeGrayscaleAsciiHashmap();
+static void createGrayscaleToAsciiHashmap();
 // create hash map for each value [0:255] to avoid recalculating ascii characters with same grayscale value
 
 static inline unsigned char computeGrayscaleToChar(uint8_t grayscaleValue);

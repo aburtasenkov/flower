@@ -9,7 +9,7 @@
 
 static unsigned char GrayscaleToAsciiHashmap[UINT8_MAX + 1] = {0};
 
-static void precomputeGrayscaleAsciiHashmap()
+static void createGrayscaleToAsciiHashmap()
 // create hash map for each value to avoid recalculating ascii characters with same grayscale value
 {
   for (size_t i = 0; i <= UINT8_MAX; ++i)
