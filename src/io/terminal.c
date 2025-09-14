@@ -1,4 +1,4 @@
-#include "terminalInput.h"
+#include "terminal.h"
 
 #include "../error.h"
 

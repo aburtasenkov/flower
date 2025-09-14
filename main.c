@@ -1,7 +1,7 @@
 #include "src/ascii/stbiToAscii.h"
 #include "src/video/videoToAscii.h"
 #include "src/config/Config.h"
-#include "src/io/terminalInput.h"
+#include "src/io/terminal.h"
 #include "src/error.h"
 #include "src/io/writeFile.h"
 
@@ -10,7 +10,7 @@
 int main(int argc, char ** argv) {
   /*-----------------------initialize optimized grayscale to ascii converter----------------*/
   init_grayscale_ascii_map();
-  
+
   /*-----------------------Load parameters from terminal-----------------------*/
   OPTIONS config = default_config();
   parse_options(&config, argc, argv);

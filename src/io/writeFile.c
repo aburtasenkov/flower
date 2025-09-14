@@ -3,7 +3,7 @@
 #include "../image/ImageStbi.h"
 #include "../ascii/stbiToAscii.h"
 #include "../ascii/asciiToPpm.h"
-#include "terminalInput.h"
+#include "terminal.h"
 #include "../error.h"
 
 #include <string.h>

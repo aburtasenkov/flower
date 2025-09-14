@@ -1,6 +1,6 @@
 #include "Config.h"
 
-#include "../io/terminalInput.h"
+#include "../io/terminal.h"
 #include "../error.h"
 
 #include <stdio.h>
