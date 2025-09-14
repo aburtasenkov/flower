@@ -3,11 +3,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define RGB_CHANNELS 3
-
-extern const uint8_t RGB_WHITE[RGB_CHANNELS];
-extern const uint8_t RGB_BLACK[RGB_CHANNELS];
-
 #define GLYPH_W 8
 #define GLYPH_H 8
 
@@ -19,8 +14,6 @@ typedef struct {
   uint8_t rows[GLYPH_H]; 
 } Glyph;
 
-// font data
-extern const Glyph FONT[];
 
-const uint8_t * glyphRows(char c);
+const uint8_t * glyph_rows(char c);
 // return binary rows of an ascii char for further image creation

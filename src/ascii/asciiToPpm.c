@@ -9,9 +9,11 @@
 // pixels of padding between characters
 static const size_t PADDING = 0;
 
-#define RGB_ARRAY_SIZE 3
+#define RGB_COLOR_CHANNELS 3
 
-static size_t countRows(const char * ascii) 
+static const uint8_t RGB_BLACK[RGB_COLOR_CHANNELS] = {0, 0, 0};
+
+static size_t count_rows(const char * ascii) 
 // return amount of y coordinates in ascii image format
 {
     size_t count = 1; // At least one row
@@ -25,7 +27,7 @@ static size_t countRows(const char * ascii)
     return count - 1;
 }
 
-static size_t countColumns(const char * ascii)
+static size_t count_columns(const char * ascii)
 // return amount of x coordinates in ascii image format
 {
     size_t count = 0;
@@ -39,12 +41,12 @@ static size_t countColumns(const char * ascii)
     return count;
 }
 
-static ImagePPM * createPPM(size_t x, size_t y)
+static ImagePPM * create_ppm(size_t x, size_t y)
 // create object of ImagePPM class
 {
     if (x < 1 || y < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid image dimensions [x: %zu, y: %zu]", x, y);
 
-    size_t sz = x * y * RGB_CHANNELS;
+    size_t sz = x * y * RGB_COLOR_CHANNELS;
 
     ImagePPM * ppm = (ImagePPM *)malloc(sizeof(ImagePPM));
     if (!ppm) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for PPM Image [size in bytes: %zu]", sizeof(ImagePPM));
@@ -57,20 +59,20 @@ static ImagePPM * createPPM(size_t x, size_t y)
     return ppm;
 }
 
-static void freePPM(ImagePPM * ppm) {
+static void free_ppm(ImagePPM * ppm) {
     if (!ppm) return;
 
     free(ppm->data);
     free(ppm);
 }
 
-static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_ARRAY_SIZE])
+static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
 // set pixel at (x,y) to rgb value
 {
     if (!rgb) printCriticalError(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
 
-    size_t index = (y * ppm->x + x) * RGB_CHANNELS;
-    size_t max_index = ppm->x * ppm->y * RGB_CHANNELS;
+    size_t index = (y * ppm->x + x) * RGB_COLOR_CHANNELS;
+    size_t max_index = ppm->x * ppm->y * RGB_COLOR_CHANNELS;
     if (index + 2 >= max_index) printCriticalError(ERROR_RUNTIME, "Pixel index out of bounds [index: %zu, max: %zu]", index + 2, max_index);
 
     ppm->data[index + 0] = rgb[0];
@@ -78,14 +80,14 @@ static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_A
     ppm->data[index + 2] = rgb[2];
 }
 
-static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth, size_t asciiHeight) {
-    size_t imageSizeX = GLYPH_W * asciiWidth + (asciiWidth - 1) * PADDING;
-    size_t imageSizeY = GLYPH_H  * asciiHeight + (asciiHeight - 1) * PADDING;
-    size_t imageSize = imageSizeX * imageSizeY * RGB_CHANNELS;
-    ImagePPM * ppm = createPPM(imageSizeX, imageSizeY);
+static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, size_t ascii_height) {
+    size_t image_width = GLYPH_W * ascii_width + (ascii_width - 1) * PADDING;
+    size_t image_height = GLYPH_H  * ascii_height + (ascii_height - 1) * PADDING;
+    size_t image_sz = image_width * image_height * RGB_COLOR_CHANNELS;
+    ImagePPM * ppm = create_ppm(image_width, image_height);
 
     // initialize all pixels to white
-    for (size_t i = 0; i < imageSize; ++i) ppm->data[i] = 255;
+    for (size_t i = 0; i < image_sz; ++i) ppm->data[i] = 255;
 
     // pixel on which the drawing "pen" currently is
     size_t pen_x = 0, pen_y = 0;
@@ -100,13 +102,13 @@ static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth,
         }
 
         // get current row of pixels and iterate over it
-        const uint8_t* pixelRows = glyphRows(ascii[i]);
+        const uint8_t* pixel_rows = glyph_rows(ascii[i]);
 
-        for (size_t glyphRow = 0; glyphRow < GLYPH_H; ++glyphRow) {
-            uint8_t pixels = pixelRows[glyphRow];
-            for (size_t glyphColumn = 0; glyphColumn < GLYPH_W; ++glyphColumn) {
-                if (pixels << glyphColumn & GLYPH_MOST_SIGNIFICANT_BIT) {
-                    setPixel(ppm, pen_x + glyphColumn, pen_y + glyphRow, RGB_BLACK);
+        for (size_t glyph_row = 0; glyph_row < GLYPH_H; ++glyph_row) {
+            uint8_t pixels = pixel_rows[glyph_row];
+            for (size_t glyph_column = 0; glyph_column < GLYPH_W; ++glyph_column) {
+                if (pixels << glyph_column & GLYPH_MOST_SIGNIFICANT_BIT) {
+                    setPixel(ppm, pen_x + glyph_column, pen_y + glyph_row, RGB_BLACK);
                 }
             }
         }
@@ -115,31 +117,31 @@ static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth,
     return ppm;
 }
 
-void asciiToPpm(const char * ascii, const char * filepath) 
+void ascii_to_ppm(const char * ascii, const char * filepath) 
 // write ascii characters in PPM file format to filepath
 {
     if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
     if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
-    ImagePPM * ppm = convertAsciiToPpmBinary(ascii, countColumns(ascii), countRows(ascii));
+    ImagePPM * ppm = convert_ascii_to_ppm(ascii, count_columns(ascii), count_rows(ascii));
 
     FILE *f = fopen(filepath, "wb");
     if (!f) {
         perror("fopen");
-        freePPM(ppm);
+        free_ppm(ppm);
         return;
     }
 
     fprintf(f, "P6\n%zu %zu\n255\n", ppm->x, ppm->y);
-    if (fwrite(ppm->data, 1, ppm->x * ppm->y * RGB_CHANNELS, f) != ppm->x * ppm->y * RGB_CHANNELS) {
+    if (fwrite(ppm->data, 1, ppm->x * ppm->y * RGB_COLOR_CHANNELS, f) != ppm->x * ppm->y * RGB_COLOR_CHANNELS) {
         perror("fwrite");
         fclose(f);
-        freePPM(ppm);
+        free_ppm(ppm);
         return;
     }
 
     if (fclose(f) != 0) {
         perror("fclose");
     }
-    freePPM(ppm);
+    free_ppm(ppm);
 }

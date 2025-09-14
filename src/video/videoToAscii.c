@@ -25,28 +25,28 @@
 
 // #define DEBUG
 
-static int executeCommand(const char * command) 
+static int execute_command(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
 {
-  int statusCode = system(command);
+  int status_code = system(command);
 
   // check if system failed
-  if (statusCode == -1) printCriticalError(ERROR_RUNTIME, "system(\"%s\") failed", command);
+  if (status_code == -1) printCriticalError(ERROR_RUNTIME, "execute_command(\"%s\") failed", command);
 
   // it exited normally --> check exit code
-  if (WIFEXITED(statusCode)) {
-    int exitCode = WEXITSTATUS(statusCode);
+  if (WIFEXITED(status_code)) {
+    int exit_code = WEXITSTATUS(status_code);
 
-    if (exitCode == EXIT_SUCCESS) {
+    if (exit_code == EXIT_SUCCESS) {
       return EXIT_SUCCESS;
     }
 
-    printNonCriticalError(exitCode, "\"%s\" ran unsucessfully (exit code %d).\n", command, exitCode);
-    return exitCode;
+    printNonCriticalError(exit_code, "\"%s\" ran unsucessfully (exit code %d).\n", command, exit_code);
+    return exit_code;
   }
   // check for signal termination
-  if (WIFSIGNALED(statusCode)) {
-    int sig = WTERMSIG(statusCode);
+  if (WIFSIGNALED(status_code)) {
+    int sig = WTERMSIG(status_code);
     sig += 128; // common convention for signal termination
     printNonCriticalError(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
     return sig;
@@ -56,14 +56,14 @@ static int executeCommand(const char * command)
   return 1;
 }
 
-static bool fileExists(const char * filepath) {
+static bool file_exists(const char * filepath) {
   if (access(filepath, F_OK) == 0) {
     return true;
   }
   return false;
 }
 
-static void sleepFrameTimeOffset(size_t FPS, const timespec_t * start, const timespec_t * end) 
+static void sleep_frame_time_offset(size_t FPS, const timespec_t * start, const timespec_t * end) 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
@@ -71,19 +71,19 @@ static void sleepFrameTimeOffset(size_t FPS, const timespec_t * start, const tim
   if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec))
     printCriticalError(ERROR_BAD_ARGUMENTS, "start time is after end time");
 
-  double frameTime = 1.0 / FPS;
-  double elapsedTime = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
-  double sleepTime = frameTime - elapsedTime;
+  double frame_time = 1.0 / FPS;
+  double elapsed_time = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
+  double sleep_time = frame_time - elapsed_time;
 
-  if (sleepTime > 0) {
-    timespec_t sleepDuration;
-    sleepDuration.tv_sec = (time_t)sleepTime;
-    sleepDuration.tv_nsec = (long)((sleepTime - sleepDuration.tv_sec) * NANOSECONDS_IN_SECOND);
-    nanosleep(&sleepDuration, NULL);
+  if (sleep_time > 0) {
+    timespec_t sleep_duration;
+    sleep_duration.tv_sec = (time_t)sleep_time;
+    sleep_duration.tv_nsec = (long)((sleep_time - sleep_duration.tv_sec) * NANOSECONDS_IN_SECOND);
+    nanosleep(&sleep_duration, NULL);
   }
 }
 
-static void printFrames(size_t blockSize, size_t FPS) 
+static void print_frames(size_t block_sz, size_t FPS) 
 // print each frame of a video while accounting for wished FPS
 {
   char filepath[22];
@@ -92,26 +92,26 @@ static void printFrames(size_t blockSize, size_t FPS)
   // count frames and cache them
   size_t capacity = 128;
   size_t sz = 0;
-  char ** asciiFrames = (char **)malloc(capacity * sizeof(char *));
+  char ** ascii_frames = (char **)malloc(capacity * sizeof(char *));
   
   for (size_t i = 1; i < MAX_FRAMES; ++i)
   {
     snprintf(filepath, sizeof(filepath), "frames/frame_%04zu.jpg", i);
-    if (!fileExists(filepath)) break;
+    if (!file_exists(filepath)) break;
 
     printf("\033[HProcessing frame #%04zu\n", i);
     
     if (sz >= capacity) 
     {
       capacity *= 2;
-      asciiFrames = (char **)realloc(asciiFrames, capacity * sizeof(char *));
+      ascii_frames = (char **)realloc(ascii_frames, capacity * sizeof(char *));
     }
 
-    ImageStbi * stbi = loadStbi(filepath);
-    char * ascii = stbiToAscii(stbi, blockSize);
-    freeStbi(stbi);
+    ImageStbi * stbi = load_stbi(filepath);
+    char * ascii = stbi_to_ascii(stbi, block_sz);
+    free_stbi(stbi);
 
-    asciiFrames[sz++] = ascii;
+    ascii_frames[sz++] = ascii;
   }
     
 // if debugging -> print real fps shown
@@ -126,12 +126,12 @@ clock_gettime(CLOCK_MONOTONIC, &t0);
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Move cursor to the top left corner of the terminal and print the frame
-    printf("\033[H%s", asciiFrames[i]);
+    printf("\033[H%s", ascii_frames[i]);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
     if (!UNLIMITED_FPS) {
-      sleepFrameTimeOffset(FPS, &start, &end); // sleep until the next frame should be displayed
+      sleep_frame_time_offset(FPS, &start, &end); // sleep until the next frame should be displayed
     }
   }
 
@@ -146,48 +146,48 @@ printf("Displayed %zu frames in %.3f seconds (%.2f FPS)\n", sz, elapsed, fps);
   // free all frames
   for (size_t i = 0; i < sz; ++i) 
   {
-    free(asciiFrames[i]);
+    free(ascii_frames[i]);
   }
-  free(asciiFrames);
+  free(ascii_frames);
 }
 
-void printVideo(const char * filepath, size_t blockSize, size_t FPS) 
+void print_video(const char * filepath, size_t block_sz, size_t FPS) 
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 {
   if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (blockSize < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1 [blockSize: %zu]", blockSize);
+  if (block_sz < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "block_sz is smaller than 1 [block_sz: %zu]", block_sz);
 
-  size_t ffmpegCommandSize = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filepath) + 1;
-  char * ffmpegCommand = (char *)malloc(ffmpegCommandSize);
-  if (!ffmpegCommand) printCriticalError(ERROR_RUNTIME, "Can not allocate enough memory for ffmpegCommand [size in bytes: %zu]", ffmpegCommandSize);
+  size_t ffmpeg_command_sz = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filepath) + 1;
+  char * ffmpeg_command = (char *)malloc(ffmpeg_command_sz);
+  if (!ffmpeg_command) printCriticalError(ERROR_RUNTIME, "Can not allocate enough memory for ffmpeg_command [size in bytes: %zu]", ffmpeg_command_sz);
   
-  snprintf(ffmpegCommand, ffmpegCommandSize, FFMPEG_DECOMPOSE_VIDEO, filepath);
+  snprintf(ffmpeg_command, ffmpeg_command_sz, FFMPEG_DECOMPOSE_VIDEO, filepath);
 
-  if (executeCommand("mkdir frames") != 0) 
+  if (execute_command("mkdir frames") != 0) 
   {
     printNonCriticalError(ERROR_RUNTIME, "Can not create \"frames\" directory");
-    free(ffmpegCommand);
+    free(ffmpeg_command);
     return;
   }
-  if (executeCommand(ffmpegCommand) != 0) 
+  if (execute_command(ffmpeg_command) != 0) 
   {
-    printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpegCommand);
-    free(ffmpegCommand);
+    printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpeg_command);
+    free(ffmpeg_command);
     return;
   }
-  if (executeCommand(clearCommand) != 0)
+  if (execute_command(clearCommand) != 0)
   {
     printNonCriticalError(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
-    free(ffmpegCommand);
+    free(ffmpeg_command);
     return;
   }
 
-  printFrames(blockSize, FPS);
+  print_frames(block_sz, FPS);
 
-  if (executeCommand("rm -rf frames") != 0)
+  if (execute_command("rm -rf frames") != 0)
   {
     printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
-  free(ffmpegCommand);
+  free(ffmpeg_command);
 }

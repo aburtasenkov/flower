@@ -3,10 +3,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-static size_t countRows(const char * ascii);
+static size_t count_rows(const char * ascii);
 // return amount of y coordinates in ascii image format
 
-static size_t countColumns(const char * ascii);
+static size_t count_columns(const char * ascii);
 // return amount of x coordinates in ascii image format
 
 typedef struct {
@@ -15,17 +15,17 @@ typedef struct {
     size_t y;
 } ImagePPM;
 
-static ImagePPM * createPPM(size_t x, size_t y);
+static ImagePPM * create_ppm(size_t x, size_t y);
 // create object of ImagePPM class of size x * y
 
-static void freePPM(ImagePPM * ppm);
+static void free_ppm(ImagePPM * ppm);
 
-#define RGB_ARRAY_SIZE 3
-static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_ARRAY_SIZE]);
+#define RGB_COLOR_CHANNELS 3
+static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS]);
 // set pixel at (x,y) to rgb value
-#undef RGB_ARRAY_SIZE
+#undef RGB_COLOR_CHANNELS
 
-static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth, size_t asciiHeight);
+static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, size_t ascii_height);
 
-void asciiToPpm(const char * ascii, const char * filepath);
+void ascii_to_ppm(const char * ascii, const char * filepath);
 // write ascii characters in PPM file format to filepath

@@ -8,7 +8,7 @@
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
 
-char * fileExtension(const char * filepath)
+char * file_extension(const char * filepath)
 // return the file extension of filepath variable
 {
   if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
@@ -16,18 +16,18 @@ char * fileExtension(const char * filepath)
   regex_t regex;
   regmatch_t match[2];
 
-  int statusCode = regcomp(&regex, REGEX_FILE_EXTENSION_PATTERN, REG_EXTENDED);
-  if (statusCode != 0) {
-    char errorBuffer[128];
-    regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
-    printCriticalError(ERROR_RUNTIME, "Regex compilation failed: %s", errorBuffer);
+  int status_code = regcomp(&regex, REGEX_FILE_EXTENSION_PATTERN, REG_EXTENDED);
+  if (status_code != 0) {
+    char error_buffer[128];
+    regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
+    printCriticalError(ERROR_RUNTIME, "Regex compilation failed: %s", error_buffer);
   }
 
-  statusCode = regexec(&regex, filepath, 2, match, 0);
-  if (statusCode != 0) {
-    char errorBuffer[128];
-    regerror(statusCode, &regex, errorBuffer, sizeof(errorBuffer));
-    printCriticalError(ERROR_RUNTIME, "Regex match filed: %s", errorBuffer);
+  status_code = regexec(&regex, filepath, 2, match, 0);
+  if (status_code != 0) {
+    char error_buffer[128];
+    regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
+    printCriticalError(ERROR_RUNTIME, "Regex match filed: %s", error_buffer);
   }
 
   int start = match[1].rm_so;
@@ -45,18 +45,18 @@ char * fileExtension(const char * filepath)
   return extension;
 }
 
-bool isVideo(const char * fileExtension) {
-  if (!fileExtension) printCriticalError(ERROR_BAD_ARGUMENTS, "fileExtension is null pointer");
-  if (strcmp(fileExtension, "mp4") == 0) return true;
+bool is_video(const char * file_extension) {
+  if (!file_extension) printCriticalError(ERROR_BAD_ARGUMENTS, "file_extension is null pointer");
+  if (strcmp(file_extension, "mp4") == 0) return true;
   return false;
 }
 
-bool isImage(const char * fileExtension) {
+bool is_image(const char * file_extension) {
   static const char * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
   size_t sz = 11;  // size of ImageExtensionArray
 
   for (size_t i = 0; i < sz; ++i) {
-    if (strcmp(fileExtension, ImageExtensionArray[i]) == 0) return true;
+    if (strcmp(file_extension, ImageExtensionArray[i]) == 0) return true;
   }
 
   return false;

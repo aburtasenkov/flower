@@ -5,11 +5,8 @@
 
 #include <ctype.h>
 
-const uint8_t RGB_WHITE[RGB_CHANNELS] = {255, 255, 255};
-const uint8_t RGB_BLACK[RGB_CHANNELS] = {0, 0, 0};
-
 // font data
-const Glyph FONT[] = {
+static const Glyph FONT[] = {
 {' ', {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}},
 {'$', {0b00010000,0b00111000,0b01010000,0b00111000,0b00010100,0b00111000,0b00010000,0b00000000}},
 {'@', {0b00111000,0b01000100,0b01011100,0b01010100,0b01011100,0b01000000,0b00111000,0b00000000}},
@@ -84,7 +81,7 @@ const Glyph FONT[] = {
 
 #define FONT_COUNT sizeof(FONT) / sizeof(FONT[0])
 
-const uint8_t * glyphRows(char c) 
+const uint8_t * glyph_rows(char c) 
 // return binary rows of an ascii char for further image creation
 {
     for (size_t i = 0; i < FONT_COUNT; ++i) {

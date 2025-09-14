@@ -6,10 +6,10 @@ typedef struct {
   unsigned char * data;
   size_t width;
   size_t height;
-  size_t Ncomponents;
+  size_t n_components;
 } ImageStbi;
 
-ImageStbi * loadStbi(const char * filepath);
+ImageStbi * load_stbi(const char * filepath);
 // create object of ImageStbi class that loads images in format that is supported by stbi
 
-void freeStbi(ImageStbi * image);
+void free_stbi(ImageStbi * image);

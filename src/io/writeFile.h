@@ -2,12 +2,12 @@
 
 #include <stddef.h>
 
-void writeImage(const char * filepath, const char * outputPath, size_t blockSize);
-// convert image at filepath to ascii and write the resulting image in outputPath
+void write_image(const char * filepath, const char * output_path, size_t block_sz);
+// convert image at filepath to ascii and write the resulting image in output_path
 // if file format is not supported, function will cause an error
 
-static void writePpm(const char * filepath, const char * outputPath, size_t blockSize);
+static void write_ppm(const char * filepath, const char * output_path, size_t block_sz);
 // convert image at filepath to ppm file
 
-static void writeTxt(const char * filepath, const char * outputPath, size_t blockSize);
+static void write_txt(const char * filepath, const char * output_path, size_t block_sz);
 // convert image at filepath to txt file

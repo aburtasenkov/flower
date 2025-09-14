@@ -15,14 +15,14 @@
 #define OPTION_BLOCKSIZE "-b"
 #define OPTION_OUTPUT "-o"
 
-OPTIONS loadDefaultConfig() {
+OPTIONS default_config() {
   OPTIONS config = {0};
   config.FPS = 24;
-  config.blockSize = 1; 
+  config.block_sz = 1; 
   return config;
 }
 
-void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
+void parse_options(OPTIONS * config, int argc, char ** argv) {
   if (argc < ARGC_MIN) printCriticalError(ERROR_BAD_ARGUMENTS, "Arguments not specified");
 
   config->filepath = argv[MEDIAPATH_ARGV_INDEX];
@@ -35,9 +35,9 @@ void readTerminalArguments(OPTIONS * config, int argc, char ** argv) {
     } 
     else if (strcmp(argv[i], OPTION_BLOCKSIZE) == 0 && (int)(i + 1) < argc) 
     {
-      int blockSize = atoi(argv[++i]);
-      if (blockSize < MIN_BLOCKSIZE) printCriticalError(ERROR_BAD_ARGUMENTS, "blockSize is smaller than 1"); 
-      config->blockSize = (size_t)blockSize;
+      int block_sz = atoi(argv[++i]);
+      if (block_sz < MIN_BLOCKSIZE) printCriticalError(ERROR_BAD_ARGUMENTS, "block_sz is smaller than 1"); 
+      config->block_sz = (size_t)block_sz;
     }
     else if (strcmp(argv[i], OPTION_OUTPUT) == 0 && (int)(i + 1) < argc) 
     {

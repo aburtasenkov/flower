@@ -5,10 +5,10 @@
 typedef struct {
   char * filepath;
   size_t FPS;
-  size_t blockSize;
+  size_t block_sz;
   char * output;
 } OPTIONS;
 
-OPTIONS loadDefaultConfig();
+OPTIONS default_config();
 
-void readTerminalArguments(OPTIONS * config, int argc, char ** argv);
+void parse_options(OPTIONS * config, int argc, char ** argv);
