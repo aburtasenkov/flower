@@ -89,6 +89,11 @@ Play a video in ASCII:
 * [ ] Interactive playback controls
 * [ ] Support for additional codecs
 
+## Constraints
+
+* Video player currently supports up to 9999 frames
+* Video player used to have ~14 fps at max. Now on my laptop it can show up to 6000 frames per second
+
 ## Author
 
 Developed by **Anton burtasenkov** – part of my [GitHub Portfolio](https://github.com/aburtasenkov). This project highlights my skills in:
