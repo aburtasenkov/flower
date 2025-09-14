@@ -18,9 +18,9 @@
 
 // OS dependent command to clear the terminal
 #ifdef _WIN32
-#define clearCommand  "cls"
+#define ClearCommand  "cls"
 #else
-#define clearCommand "clear"
+#define ClearCommand "clear"
 #endif
 
 // #define DEBUG
@@ -120,6 +120,11 @@ timespec_t t0, t1;
 clock_gettime(CLOCK_MONOTONIC, &t0);
 #endif
 
+  if (execute_command(ClearCommand) != 0)
+  {
+    raise_noncritical_error(ERROR_RUNTIME, "Can not clear terminal [command: %s]", ClearCommand);
+    return;
+  }
   // draw individual frames
   timespec_t start, end;
   for (size_t i = 0; i < sz; ++i) {
@@ -173,12 +178,6 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS)
   if (execute_command(ffmpeg_command) != 0) 
   {
     raise_noncritical_error(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpeg_command);
-    free(ffmpeg_command);
-    return;
-  }
-  if (execute_command(clearCommand) != 0)
-  {
-    raise_noncritical_error(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
     free(ffmpeg_command);
     return;
   }
