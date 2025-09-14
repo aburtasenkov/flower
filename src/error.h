@@ -7,14 +7,14 @@
 #define ERROR_EXTERNAL 2
 #define ERROR_RUNTIME 3
 
-#define printCriticalError(ERROR_CODE, fmt, ...) \
+#define raise_critical_error(ERROR_CODE, fmt, ...) \
     do { \
         fprintf(stderr, "Error with code %d: " fmt "\n\tat %s:%d in function %s\n", \
                 (int)ERROR_CODE, ##__VA_ARGS__, __FILE__, __LINE__, __func__); \
         exit(ERROR_CODE); \
     } while (0)
 
-#define printNonCriticalError(ERROR_CODE, fmt, ...) \
+#define raise_noncritical_error(ERROR_CODE, fmt, ...) \
         fprintf(stderr, "Error with code %d: " fmt "\n\tat %s:%d in function %s\n", \
                 (int)ERROR_CODE, ##__VA_ARGS__, __FILE__, __LINE__, __func__)
 

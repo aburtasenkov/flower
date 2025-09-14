@@ -8,14 +8,14 @@
 ImageStbi * load_stbi(const char * filepath)
 // create object of ImageStbi class that loads images in format that is supported by stbi
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   ImageStbi * stbi = (ImageStbi *)malloc(sizeof(ImageStbi));
-  if (!stbi) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
+  if (!stbi) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
 
   int width, height, n_components;
   unsigned char * data = stbi_load(filepath, &width, &height, &n_components, 0);
-  if (!data) printCriticalError(ERROR_RUNTIME, "Cannot load image [filepath: %s]", filepath);
+  if (!data) raise_critical_error(ERROR_RUNTIME, "Cannot load image [filepath: %s]", filepath);
 
   stbi->data = data;
   stbi->width = (size_t)width;

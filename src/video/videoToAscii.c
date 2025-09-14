@@ -31,7 +31,7 @@ static int execute_command(const char * command)
   int status_code = system(command);
 
   // check if system failed
-  if (status_code == -1) printCriticalError(ERROR_RUNTIME, "execute_command(\"%s\") failed", command);
+  if (status_code == -1) raise_critical_error(ERROR_RUNTIME, "execute_command(\"%s\") failed", command);
 
   // it exited normally --> check exit code
   if (WIFEXITED(status_code)) {
@@ -41,18 +41,18 @@ static int execute_command(const char * command)
       return EXIT_SUCCESS;
     }
 
-    printNonCriticalError(exit_code, "\"%s\" ran unsucessfully (exit code %d).\n", command, exit_code);
+    raise_noncritical_error(exit_code, "\"%s\" ran unsucessfully (exit code %d).\n", command, exit_code);
     return exit_code;
   }
   // check for signal termination
   if (WIFSIGNALED(status_code)) {
     int sig = WTERMSIG(status_code);
     sig += 128; // common convention for signal termination
-    printNonCriticalError(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
+    raise_noncritical_error(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
     return sig;
   }
   // all other non formal terminations
-  printCriticalError(ERROR_RUNTIME, "system(\"%s\") did not terminate normally", command);
+  raise_critical_error(ERROR_RUNTIME, "system(\"%s\") did not terminate normally", command);
   return 1;
 }
 
@@ -67,9 +67,9 @@ static void sleep_frame_time_offset(size_t FPS, const timespec_t * start, const 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
-  if (!start || !end) printCriticalError(ERROR_BAD_ARGUMENTS, "start or end is null pointer");
+  if (!start || !end) raise_critical_error(ERROR_BAD_ARGUMENTS, "start or end is null pointer");
   if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec))
-    printCriticalError(ERROR_BAD_ARGUMENTS, "start time is after end time");
+    raise_critical_error(ERROR_BAD_ARGUMENTS, "start time is after end time");
 
   double frame_time = 1.0 / FPS;
   double elapsed_time = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
@@ -155,30 +155,30 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS)
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (block_sz < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "block_sz is smaller than 1 [block_sz: %zu]", block_sz);
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz is smaller than 1 [block_sz: %zu]", block_sz);
 
   size_t ffmpeg_command_sz = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filepath) + 1;
   char * ffmpeg_command = (char *)malloc(ffmpeg_command_sz);
-  if (!ffmpeg_command) printCriticalError(ERROR_RUNTIME, "Can not allocate enough memory for ffmpeg_command [size in bytes: %zu]", ffmpeg_command_sz);
+  if (!ffmpeg_command) raise_critical_error(ERROR_RUNTIME, "Can not allocate enough memory for ffmpeg_command [size in bytes: %zu]", ffmpeg_command_sz);
   
   snprintf(ffmpeg_command, ffmpeg_command_sz, FFMPEG_DECOMPOSE_VIDEO, filepath);
 
   if (execute_command("mkdir frames") != 0) 
   {
-    printNonCriticalError(ERROR_RUNTIME, "Can not create \"frames\" directory");
+    raise_noncritical_error(ERROR_RUNTIME, "Can not create \"frames\" directory");
     free(ffmpeg_command);
     return;
   }
   if (execute_command(ffmpeg_command) != 0) 
   {
-    printNonCriticalError(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpeg_command);
+    raise_noncritical_error(ERROR_RUNTIME, "Error executing ffmpeg command: %s", ffmpeg_command);
     free(ffmpeg_command);
     return;
   }
   if (execute_command(clearCommand) != 0)
   {
-    printNonCriticalError(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
+    raise_noncritical_error(ERROR_RUNTIME, "Can not clear terminal [command: %s]", clearCommand);
     free(ffmpeg_command);
     return;
   }
@@ -187,7 +187,7 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS)
 
   if (execute_command("rm -rf frames") != 0)
   {
-    printNonCriticalError(ERROR_RUNTIME, "Can not remove \"frames\" directory");
+    raise_noncritical_error(ERROR_RUNTIME, "Can not remove \"frames\" directory");
   }
   free(ffmpeg_command);
 }

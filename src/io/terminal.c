@@ -11,7 +11,7 @@
 char * file_extension(const char * filepath)
 // return the file extension of filepath variable
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   regex_t regex;
   regmatch_t match[2];
@@ -20,14 +20,14 @@ char * file_extension(const char * filepath)
   if (status_code != 0) {
     char error_buffer[128];
     regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
-    printCriticalError(ERROR_RUNTIME, "Regex compilation failed: %s", error_buffer);
+    raise_critical_error(ERROR_RUNTIME, "Regex compilation failed: %s", error_buffer);
   }
 
   status_code = regexec(&regex, filepath, 2, match, 0);
   if (status_code != 0) {
     char error_buffer[128];
     regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
-    printCriticalError(ERROR_RUNTIME, "Regex match filed: %s", error_buffer);
+    raise_critical_error(ERROR_RUNTIME, "Regex match filed: %s", error_buffer);
   }
 
   int start = match[1].rm_so;
@@ -35,7 +35,7 @@ char * file_extension(const char * filepath)
 
   int length = end - start;
   char * extension = (char *)malloc(length + 1); // +1 for '\0'
-  if (!extension) printCriticalError(ERROR_RUNTIME, "Error allocating memory for file extension");
+  if (!extension) raise_critical_error(ERROR_RUNTIME, "Error allocating memory for file extension");
 
   memcpy(extension, filepath + start, length);
   extension[length] = '\0';
@@ -46,7 +46,7 @@ char * file_extension(const char * filepath)
 }
 
 bool is_video(const char * file_extension) {
-  if (!file_extension) printCriticalError(ERROR_BAD_ARGUMENTS, "file_extension is null pointer");
+  if (!file_extension) raise_critical_error(ERROR_BAD_ARGUMENTS, "file_extension is null pointer");
   if (strcmp(file_extension, "mp4") == 0) return true;
   return false;
 }

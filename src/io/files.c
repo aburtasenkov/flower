@@ -12,9 +12,9 @@ void write_image(const char * filepath, const char * output_path, size_t block_s
 // convert image at filepath to ascii and write the resulting image in output_path
 // if file format is not supported, function will cause an error
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (!output_path) printCriticalError(ERROR_BAD_ARGUMENTS, "output_path is null pointer");
-  if (block_sz < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "block_sz < 1 [block_sz: %zu]", block_sz);
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!output_path) raise_critical_error(ERROR_BAD_ARGUMENTS, "output_path is null pointer");
+  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz < 1 [block_sz: %zu]", block_sz);
 
   char * extension = file_extension(output_path);
 
@@ -32,8 +32,8 @@ void write_image(const char * filepath, const char * output_path, size_t block_s
     return;
   }
 
-  printCriticalError(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
-  //didn't forget "free(extension);", its just not needed as printCriticalError will stop control flow and OS will cleanup
+  raise_critical_error(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
+  //didn't forget "free(extension);", its just not needed as raise_critical_error will stop control flow and OS will cleanup
 }
 
 static void write_ppm(const char * filepath, const char * output_path, size_t block_sz)

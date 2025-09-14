@@ -20,7 +20,7 @@ static size_t count_rows(const char * ascii)
         ++ascii;
     }
 
-    if (count < 1) printCriticalError(ERROR_RUNTIME, "Row count less than 1 [count: %zu]", count);
+    if (count < 1) raise_critical_error(ERROR_RUNTIME, "Row count less than 1 [count: %zu]", count);
 
     return count - 1;
 }
@@ -34,7 +34,7 @@ static size_t count_columns(const char * ascii)
         ++ascii;
     }
 
-    if (count < 1) printCriticalError(ERROR_RUNTIME, "Column count less than 1 [count: %zu]", count);
+    if (count < 1) raise_critical_error(ERROR_RUNTIME, "Column count less than 1 [count: %zu]", count);
 
     return count;
 }
@@ -42,15 +42,15 @@ static size_t count_columns(const char * ascii)
 static ImagePPM * create_ppm(size_t x, size_t y)
 // create object of ImagePPM class
 {
-    if (x < 1 || y < 1) printCriticalError(ERROR_BAD_ARGUMENTS, "Invalid image dimensions [x: %zu, y: %zu]", x, y);
+    if (x < 1 || y < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "Invalid image dimensions [x: %zu, y: %zu]", x, y);
 
     size_t sz = x * y * RGB_COLOR_CHANNELS;
 
     ImagePPM * ppm = (ImagePPM *)malloc(sizeof(ImagePPM));
-    if (!ppm) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for PPM Image [size in bytes: %zu]", sizeof(ImagePPM));
+    if (!ppm) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for PPM Image [size in bytes: %zu]", sizeof(ImagePPM));
 
     ppm->data = (unsigned char *)malloc(sz);
-    if (!ppm->data) printCriticalError(ERROR_RUNTIME, "Cannot allocate enough memory for PPM Image [size in bytes: %zu]", sz);
+    if (!ppm->data) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for PPM Image [size in bytes: %zu]", sz);
     ppm->x = x;
     ppm->y = y;
 
@@ -67,11 +67,11 @@ void free_ppm(ImagePPM * ppm) {
 static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
 // set pixel at (x,y) to rgb value
 {
-    if (!rgb) printCriticalError(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
+    if (!rgb) raise_critical_error(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
 
     size_t index = (y * ppm->x + x) * RGB_COLOR_CHANNELS;
     size_t max_index = ppm->x * ppm->y * RGB_COLOR_CHANNELS;
-    if (index + 2 >= max_index) printCriticalError(ERROR_RUNTIME, "Pixel index out of bounds [index: %zu, max: %zu]", index + 2, max_index);
+    if (index + 2 >= max_index) raise_critical_error(ERROR_RUNTIME, "Pixel index out of bounds [index: %zu, max: %zu]", index + 2, max_index);
 
     ppm->data[index + 0] = rgb[0];
     ppm->data[index + 1] = rgb[1];
@@ -117,7 +117,7 @@ static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, s
 
 ImagePPM * ascii_to_ppm(const char * ascii) 
 {
-    if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
+    if (!ascii) raise_critical_error(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
 
     ImagePPM * ppm = convert_ascii_to_ppm(ascii, count_columns(ascii), count_rows(ascii));
     return ppm;

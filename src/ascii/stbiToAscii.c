@@ -59,7 +59,7 @@ char * stbi_to_ascii(const ImageStbi * stbi, size_t block_sz)
   size_t out_height = (stbi->height + block_sz - 1) / block_sz;
 
   char * ascii_image = (char *)malloc(out_width * out_height + out_height + 1); // +height for "\n" and +1 for "\0" characters
-  if (!ascii_image) printCriticalError(ERROR_RUNTIME, "Can not allocate enough memory for ascii_image [size in bytes: %zu]", out_width * out_height + out_height + 1);
+  if (!ascii_image) raise_critical_error(ERROR_RUNTIME, "Can not allocate enough memory for ascii_image [size in bytes: %zu]", out_width * out_height + out_height + 1);
   size_t idx = 0;
 
   // iterate over each pixel
@@ -91,7 +91,7 @@ char * stbi_to_ascii(const ImageStbi * stbi, size_t block_sz)
 void print_image(const char * filepath, size_t block_sz) 
 // convert image located at filepath into ascii character array and print it out in terminal
 {
-  if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
   ImageStbi * stbi = load_stbi(filepath);
   printf("Read image width:%zu Height:%zu ComponentsSize:%zu\n", stbi->width, stbi->height, stbi->n_components);

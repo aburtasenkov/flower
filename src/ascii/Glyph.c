@@ -87,5 +87,5 @@ const uint8_t * glyph_rows(char c)
     for (size_t i = 0; i < FONT_COUNT; ++i) {
         if (FONT[i].c == c) return FONT[i].rows;
     }
-    printCriticalError(ERROR_BAD_ARGUMENTS, "Drawing this character is not supported yet [c: %c]", c);
+    raise_critical_error(ERROR_BAD_ARGUMENTS, "Drawing this character is not supported yet [c: %c]", c);
 }
