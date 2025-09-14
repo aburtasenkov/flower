@@ -8,7 +8,7 @@ Flower is a C-based tool that converts **images and videos into ASCII**, viewabl
 
 ## Dependencies
 
-* [stbi_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (already included in src directory)
+* [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (already included in src directory)
 * ffmpeg for extracting invidivual frames from .mp4 videos
 
 ## Features
@@ -24,6 +24,7 @@ Flower is a C-based tool that converts **images and videos into ASCII**, viewabl
 * GCC or Clang compiler
 * Standard C libraries
 * Linux/macOS terminal (Windows users can run with WSL)
+* make
 
 ### Installation
 
@@ -33,14 +34,6 @@ Clone the repository:
 git clone https://github.com/aburtasenkov/flower.git
 cd flower
 ```
-
-Build the project:
-
-```bash
-bash compile.sh
-```
-
-This will generate the `main` executable.
 
 ## ▶️ Usage
 
