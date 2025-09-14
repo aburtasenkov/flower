@@ -1,4 +1,7 @@
 -make padding between glyphs adjustable
 -make conversion of ppms to video again
--make code faster so unlimited fps is actually fast
 -make padding be an input parameter
+
+-allow for more frames. Like up to 999.999
+-make interactive video player (pause, back a frame, front a frame)
+-show percentage done when preprocessing frames
