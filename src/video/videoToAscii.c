@@ -2,66 +2,18 @@
 
 #include "../image/ImageStbi.h"
 #include "../ascii/stbiToAscii.h"
+#include "../io/files.h"
+#include "../io/terminal.h"
 
 #include "../error.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 
 #define NANOSECONDS_IN_SECOND 1e9
 
-#define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.jpg"
-// --> max amount of frames = 9999
-#define MAX_FRAMES 9999
-
-// OS dependent command to clear the terminal
-#ifdef _WIN32
-#define ClearCommand  "cls"
-#else
-#define ClearCommand "clear"
-#endif
-
 // #define DEBUG
-
-static int execute_command(const char * command) 
-// Wrapper for system(*command*) calls in order to ease debugging
-{
-  int status_code = system(command);
-
-  // check if system failed
-  if (status_code == -1) raise_critical_error(ERROR_RUNTIME, "execute_command(\"%s\") failed", command);
-
-  // it exited normally --> check exit code
-  if (WIFEXITED(status_code)) {
-    int exit_code = WEXITSTATUS(status_code);
-
-    if (exit_code == EXIT_SUCCESS) {
-      return EXIT_SUCCESS;
-    }
-
-    raise_noncritical_error(exit_code, "\"%s\" ran unsucessfully (exit code %d).\n", command, exit_code);
-    return exit_code;
-  }
-  // check for signal termination
-  if (WIFSIGNALED(status_code)) {
-    int sig = WTERMSIG(status_code);
-    sig += 128; // common convention for signal termination
-    raise_noncritical_error(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
-    return sig;
-  }
-  // all other non formal terminations
-  raise_critical_error(ERROR_RUNTIME, "system(\"%s\") did not terminate normally", command);
-  return 1;
-}
-
-static bool file_exists(const char * filepath) {
-  if (access(filepath, F_OK) == 0) {
-    return true;
-  }
-  return false;
-}
 
 static void sleep_frame_time_offset(size_t FPS, const timespec_t * start, const timespec_t * end) 
 // sleep until the next frame should be displayed
@@ -99,7 +51,7 @@ static void print_frames(size_t block_sz, size_t FPS)
     snprintf(filepath, sizeof(filepath), "frames/frame_%04zu.jpg", i);
     if (!file_exists(filepath)) break;
 
-    printf("\033[HProcessing frame #%04zu\n", i);
+    printf("\nProcessing frame #%04zu", i);
     
     if (sz >= capacity) 
     {
@@ -120,18 +72,14 @@ timespec_t t0, t1;
 clock_gettime(CLOCK_MONOTONIC, &t0);
 #endif
 
-  if (execute_command(ClearCommand) != 0)
-  {
-    raise_noncritical_error(ERROR_RUNTIME, "Can not clear terminal [command: %s]", ClearCommand);
-    return;
-  }
   // draw individual frames
   timespec_t start, end;
   for (size_t i = 0; i < sz; ++i) {
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     // Move cursor to the top left corner of the terminal and print the frame
-    printf("\033[H%s", ascii_frames[i]);
+    printf("\033[2J\033[H%s", ascii_frames[i]);
+    fflush(stdout);
 
     clock_gettime(CLOCK_MONOTONIC, &end);
 
@@ -163,7 +111,10 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS)
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz is smaller than 1 [block_sz: %zu]", block_sz);
 
-  size_t ffmpeg_command_sz = strlen(FFMPEG_DECOMPOSE_VIDEO) + strlen(filepath) + 1;
+  size_t ffmpeg_command_sz = strlen(FFMPEG_DECOMPOSE_VIDEO) 
+                              - 2 // discard %s 
+                              + strlen(filepath) 
+                              + 1; // null terminator
   char * ffmpeg_command = (char *)malloc(ffmpeg_command_sz);
   if (!ffmpeg_command) raise_critical_error(ERROR_RUNTIME, "Can not allocate enough memory for ffmpeg_command [size in bytes: %zu]", ffmpeg_command_sz);
   

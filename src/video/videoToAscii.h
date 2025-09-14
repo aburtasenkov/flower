@@ -1,15 +1,8 @@
 #pragma once
 
-#include <stdbool.h>
-
 #include <time.h>
 
 typedef struct timespec timespec_t;
-
-static int execute_command(const char * command);
-// Wrapper for system(*command*) calls in order to ease debugging
-
-static bool file_exists(const char * filepath);
 
 static void print_frames(size_t block_sz, size_t FPS);
 // print each frame of a video while accounting for wished FPS

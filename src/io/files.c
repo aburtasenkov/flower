@@ -7,6 +7,15 @@
 #include "../error.h"
 
 #include <string.h>
+#include <unistd.h>
+
+bool file_exists(const char * filepath) 
+{
+  if (access(filepath, F_OK) == 0) {
+    return true;
+  }
+  return false;
+}
 
 void write_image(const char * filepath, const char * output_path, size_t block_sz)
 // convert image at filepath to ascii and write the resulting image in output_path

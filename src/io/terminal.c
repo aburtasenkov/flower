@@ -8,6 +8,37 @@
 
 #define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
 
+int execute_command(const char * command) 
+// Wrapper for system(*command*) calls in order to ease debugging
+{
+  int status_code = system(command);
+
+  // check if system failed
+  if (status_code == -1) raise_critical_error(ERROR_RUNTIME, "execute_command(\"%s\") failed", command);
+
+  // it exited normally --> check exit code
+  if (WIFEXITED(status_code)) {
+    int exit_code = WEXITSTATUS(status_code);
+
+    if (exit_code == EXIT_SUCCESS) {
+      return EXIT_SUCCESS;
+    }
+
+    raise_noncritical_error(exit_code, "\"%s\" ran unsucessfully (exit code %d).\n", command, exit_code);
+    return exit_code;
+  }
+  // check for signal termination
+  if (WIFSIGNALED(status_code)) {
+    int sig = WTERMSIG(status_code);
+    sig += 128; // common convention for signal termination
+    raise_noncritical_error(sig, "\"%s\" was terminated by signal %d.\n", command, sig);
+    return sig;
+  }
+  // all other non formal terminations
+  raise_critical_error(ERROR_RUNTIME, "system(\"%s\") did not terminate normally", command);
+  return 1;
+}
+
 char * file_extension(const char * filepath)
 // return the file extension of filepath variable
 {
