@@ -3,7 +3,7 @@
 #include "src/config/Config.h"
 #include "src/io/terminal.h"
 #include "src/error.h"
-#include "src/io/writeFile.h"
+#include "src/io/files.h"
 
 #include "stdlib.h"
 
