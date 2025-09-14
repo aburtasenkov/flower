@@ -1,7 +1,7 @@
 
 #include "Glyph.h"
 
-#include "error.h"
+#include "../error.h"
 
 #include <ctype.h>
 

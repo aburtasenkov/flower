@@ -1,6 +1,6 @@
 #include "stbiToAscii.h"
 
-#include "error.h"
+#include "../error.h"
 
 #include <assert.h>
 #include <stdbool.h>

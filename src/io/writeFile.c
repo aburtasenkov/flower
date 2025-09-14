@@ -1,10 +1,10 @@
 #include "writeFile.h"
 
-#include "ImageStbi.h"
-#include "stbiToAscii.h"
-#include "asciiToPpm.h"
+#include "../image/ImageStbi.h"
+#include "../ascii/stbiToAscii.h"
+#include "../ascii/asciiToPpm.h"
 #include "terminalInput.h"
-#include "error.h"
+#include "../error.h"
 
 #include <string.h>
 

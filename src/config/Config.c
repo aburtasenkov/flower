@@ -1,7 +1,7 @@
 #include "Config.h"
 
-#include "terminalInput.h"
-#include "error.h"
+#include "../io/terminalInput.h"
+#include "../error.h"
 
 #include <stdio.h>
 #include <string.h>

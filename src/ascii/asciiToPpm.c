@@ -1,6 +1,6 @@
 #include "asciiToPpm.h" 
 
-#include "error.h"
+#include "../error.h"
 #include "Glyph.h"
 
 #include <stdlib.h>

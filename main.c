@@ -1,9 +1,9 @@
-#include "src/stbiToAscii.h"
-#include "src/videoToAscii.h"
-#include "src/Config.h"
-#include "src/terminalInput.h"
+#include "src/ascii/stbiToAscii.h"
+#include "src/video/videoToAscii.h"
+#include "src/config/Config.h"
+#include "src/io/terminalInput.h"
 #include "src/error.h"
-#include "src/writeFile.h"
+#include "src/io/writeFile.h"
 
 #include "stdlib.h"
 

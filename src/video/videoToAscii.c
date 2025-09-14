@@ -1,9 +1,9 @@
 #include "videoToAscii.h"
 
-#include "ImageStbi.h"
-#include "stbiToAscii.h"
+#include "../image/ImageStbi.h"
+#include "../ascii/stbiToAscii.h"
 
-#include "error.h"
+#include "../error.h"
 
 #include <stdlib.h>
 #include <stdio.h>

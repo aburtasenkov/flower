@@ -1,6 +1,6 @@
 #pragma once 
 
-#include "ImageStbi.h"
+#include "../image/ImageStbi.h"
 
 #include <stdint.h>
 

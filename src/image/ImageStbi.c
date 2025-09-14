@@ -1,9 +1,9 @@
 #include "ImageStbi.h"
 
-#include "error.h"
+#include "../error.h"
 
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 ImageStbi * loadStbi(const char * filepath)
 // create object of ImageStbi class that loads images in format that is supported by stbi
