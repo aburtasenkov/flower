@@ -44,8 +44,28 @@ static void write_ppm(const char * filepath, const char * output_path, size_t bl
   char * ascii_image = stbi_to_ascii(stbi, block_sz);
   free_stbi(stbi);
   
-  ascii_to_ppm(ascii_image, output_path);
+  ImagePPM * ppm = ascii_to_ppm(ascii_image);
   free(ascii_image);
+
+  FILE *f = fopen(output_path, "wb");
+  if (!f) {
+      perror("fopen");
+      free_ppm(ppm);
+      return;
+  }
+
+  fprintf(f, "P6\n%zu %zu\n255\n", ppm->x, ppm->y);
+  if (fwrite(ppm->data, 1, ppm->x * ppm->y * RGB_COLOR_CHANNELS, f) != ppm->x * ppm->y * RGB_COLOR_CHANNELS) {
+      perror("fwrite");
+      fclose(f);
+      free_ppm(ppm);
+      return;
+  }
+
+  if (fclose(f) != 0) {
+      perror("fclose");
+  }
+  free_ppm(ppm);
 }
 
 static void write_txt(const char * filepath, const char * output_path, size_t block_sz)

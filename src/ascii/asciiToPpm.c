@@ -9,8 +9,6 @@
 // pixels of padding between characters
 static const size_t PADDING = 0;
 
-#define RGB_COLOR_CHANNELS 3
-
 static const uint8_t RGB_BLACK[RGB_COLOR_CHANNELS] = {0, 0, 0};
 
 static size_t count_rows(const char * ascii) 
@@ -59,14 +57,14 @@ static ImagePPM * create_ppm(size_t x, size_t y)
     return ppm;
 }
 
-static void free_ppm(ImagePPM * ppm) {
+void free_ppm(ImagePPM * ppm) {
     if (!ppm) return;
 
     free(ppm->data);
     free(ppm);
 }
 
-static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
+static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
 // set pixel at (x,y) to rgb value
 {
     if (!rgb) printCriticalError(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
@@ -108,7 +106,7 @@ static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, s
             uint8_t pixels = pixel_rows[glyph_row];
             for (size_t glyph_column = 0; glyph_column < GLYPH_W; ++glyph_column) {
                 if (pixels << glyph_column & GLYPH_MOST_SIGNIFICANT_BIT) {
-                    setPixel(ppm, pen_x + glyph_column, pen_y + glyph_row, RGB_BLACK);
+                    set_pixel(ppm, pen_x + glyph_column, pen_y + glyph_row, RGB_BLACK);
                 }
             }
         }
@@ -117,31 +115,10 @@ static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, s
     return ppm;
 }
 
-void ascii_to_ppm(const char * ascii, const char * filepath) 
-// write ascii characters in PPM file format to filepath
+ImagePPM * ascii_to_ppm(const char * ascii) 
 {
     if (!ascii) printCriticalError(ERROR_BAD_ARGUMENTS, "ascii is null pointer");
-    if (!filepath) printCriticalError(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
 
     ImagePPM * ppm = convert_ascii_to_ppm(ascii, count_columns(ascii), count_rows(ascii));
-
-    FILE *f = fopen(filepath, "wb");
-    if (!f) {
-        perror("fopen");
-        free_ppm(ppm);
-        return;
-    }
-
-    fprintf(f, "P6\n%zu %zu\n255\n", ppm->x, ppm->y);
-    if (fwrite(ppm->data, 1, ppm->x * ppm->y * RGB_COLOR_CHANNELS, f) != ppm->x * ppm->y * RGB_COLOR_CHANNELS) {
-        perror("fwrite");
-        fclose(f);
-        free_ppm(ppm);
-        return;
-    }
-
-    if (fclose(f) != 0) {
-        perror("fclose");
-    }
-    free_ppm(ppm);
+    return ppm;
 }

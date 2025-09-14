@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define RGB_COLOR_CHANNELS 3
+
 static size_t count_rows(const char * ascii);
 // return amount of y coordinates in ascii image format
 
@@ -18,14 +20,11 @@ typedef struct {
 static ImagePPM * create_ppm(size_t x, size_t y);
 // create object of ImagePPM class of size x * y
 
-static void free_ppm(ImagePPM * ppm);
+void free_ppm(ImagePPM * ppm);
 
-#define RGB_COLOR_CHANNELS 3
 static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS]);
 // set pixel at (x,y) to rgb value
-#undef RGB_COLOR_CHANNELS
 
 static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, size_t ascii_height);
 
-void ascii_to_ppm(const char * ascii, const char * filepath);
-// write ascii characters in PPM file format to filepath
+ImagePPM * ascii_to_ppm(const char * ascii);
