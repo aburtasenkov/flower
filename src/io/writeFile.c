@@ -41,7 +41,7 @@ static void writePpm(const char * filepath, const char * outputPath, size_t bloc
 {
   // load stbi image and convert it to ascii
   ImageStbi * stbi = loadStbi(filepath);
-  unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
+  char * asciiImage = stbiToAscii(stbi, blockSize);
   freeStbi(stbi);
   
   asciiToPpm(asciiImage, outputPath);
@@ -53,7 +53,7 @@ static void writeTxt(const char * filepath, const char * outputPath, size_t bloc
 {
   // load stbi image and convert it to ascii image
   ImageStbi * stbi = loadStbi(filepath);
-  unsigned char * asciiImage = stbiToAscii(stbi, blockSize);
+  char * asciiImage = stbiToAscii(stbi, blockSize);
   freeStbi(stbi);
   
   FILE * txt = fopen(outputPath, "w");

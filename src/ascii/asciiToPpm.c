@@ -9,7 +9,6 @@
 // pixels of padding between characters
 static const size_t PADDING = 0;
 
-// 3 8-bit integers for one color 
 #define RGB_ARRAY_SIZE 3
 
 static size_t countRows(const char * ascii) 

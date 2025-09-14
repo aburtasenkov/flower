@@ -52,7 +52,7 @@ bool isVideo(const char * fileExtension) {
 }
 
 bool isImage(const char * fileExtension) {
-  static const char const * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
+  static const char * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
   size_t sz = 11;  // size of ImageExtensionArray
 
   for (size_t i = 0; i < sz; ++i) {

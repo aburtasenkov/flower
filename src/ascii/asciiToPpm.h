@@ -20,8 +20,10 @@ static ImagePPM * createPPM(size_t x, size_t y);
 
 static void freePPM(ImagePPM * ppm);
 
-static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[]);
+#define RGB_ARRAY_SIZE 3
+static void setPixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_ARRAY_SIZE]);
 // set pixel at (x,y) to rgb value
+#undef RGB_ARRAY_SIZE
 
 static ImagePPM * convertAsciiToPpmBinary(const char * ascii, size_t asciiWidth, size_t asciiHeight);
 
