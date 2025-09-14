@@ -8,26 +8,29 @@
 #include "stdlib.h"
 
 int main(int argc, char ** argv) {
+  /*-----------------------initialize optimized grayscale to ascii converter----------------*/
+  init_grayscale_ascii_map();
+  
   /*-----------------------Load parameters from terminal-----------------------*/
-  OPTIONS config = loadDefaultConfig();
-  readTerminalArguments(&config, argc, argv);
+  OPTIONS config = default_config();
+  parse_options(&config, argc, argv);
 
-  char * extension = fileExtension(config.filepath);
+  char * extension = file_extension(config.filepath);
   printf("File Extension: %s\n", extension);
 
   /*-----------------------Execute code-----------------------*/
 
-  if (isVideo(extension)) 
+  if (is_video(extension)) 
   {
-    printVideo(config.filepath, config.blockSize, config.FPS);
+    print_video(config.filepath, config.block_sz, config.FPS);
   }
-  else if (isImage(extension))
+  else if (is_image(extension))
   {
     if (config.output) {
-      writeImage(config.filepath, config.output, config.blockSize);
+      write_image(config.filepath, config.output, config.block_sz);
       printf("Wrote ascii image to file: %s\n", config.output);
     }
-    else printImage(config.filepath, config.blockSize);
+    else print_image(config.filepath, config.block_sz);
   }
 
   free(extension);
