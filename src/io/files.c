@@ -8,6 +8,9 @@
 
 #include <string.h>
 #include <unistd.h>
+#include <regex.h>
+
+#define REGEX_FILE_EXTENSION_PATTERN "\\.([^.]+)$"
 
 bool file_exists(const char * filepath) 
 {
@@ -15,6 +18,43 @@ bool file_exists(const char * filepath)
     return true;
   }
   return false;
+}
+
+char * file_extension(const char * filepath)
+// return the file extension of filepath variable
+{
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+
+  regex_t regex;
+  regmatch_t match[2];
+
+  int status_code = regcomp(&regex, REGEX_FILE_EXTENSION_PATTERN, REG_EXTENDED);
+  if (status_code != 0) {
+    char error_buffer[128];
+    regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
+    raise_critical_error(ERROR_RUNTIME, "Regex compilation failed: %s", error_buffer);
+  }
+
+  status_code = regexec(&regex, filepath, 2, match, 0);
+  if (status_code != 0) {
+    char error_buffer[128];
+    regerror(status_code, &regex, error_buffer, sizeof(error_buffer));
+    raise_critical_error(ERROR_RUNTIME, "Regex match filed: %s", error_buffer);
+  }
+
+  int start = match[1].rm_so;
+  int end = match[1].rm_eo;
+
+  int length = end - start;
+  char * extension = (char *)malloc(length + 1); // +1 for '\0'
+  if (!extension) raise_critical_error(ERROR_RUNTIME, "Error allocating memory for file extension");
+
+  memcpy(extension, filepath + start, length);
+  extension[length] = '\0';
+
+  regfree(&regex);
+
+  return extension;
 }
 
 void write_image(const char * filepath, const char * output_path, size_t block_sz)
