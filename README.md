@@ -9,13 +9,14 @@ Flower is a C-based tool that converts **images and videos into ASCII**, viewabl
 ## Dependencies
 
 * [stb_image.h](https://github.com/nothings/stb/blob/master/stb_image.h) (already included in src directory)
-* ffmpeg for extracting invidivual frames from .mp4 videos
+* [ffmpeg](https://ffmpeg.org/) for extracting invidivual frames from .mp4 videos and retrieving the video resolution
 
 ## Features
 
-* Converting static images to ASCII arrays of characters, depending on colors of corresponding pixels
-* Displaying these images in terminal
-* Displaying videos in terminal as ACSII images
+* Convert static images into ASCII characters, mapped by pixel colors
+* Render ASCII images directly in your terminal
+* Play videos as ASCII animations
+* Export ASCII art to files
   
 ## Getting Started
 
@@ -23,7 +24,7 @@ Flower is a C-based tool that converts **images and videos into ASCII**, viewabl
 
 * GCC or Clang compiler
 * Standard C libraries
-* Linux/macOS terminal (Windows users can run with WSL)
+* Linux/macOS terminal (Windows users: use WSL)
 * make
 
 ### Installation
@@ -91,17 +92,19 @@ Play a video in ASCII:
 
 ## Constraints
 
-* Video player currently supports up to 9999 frames
-* Video player used to have ~14 fps at max. Now on my laptop it can show up to 6000 frames per second
+* Video playback currently supports ~125 frames (tested on Ryzen 7).
+* Precomputing frames allows extremely high FPS (up to ~6000), but can take a long setup depending on video length.
+* The current implementation streams directly from ffmpeg, avoiding performance-killing temp file I/O.
+* For better performance, clear your terminal before playing a video.
 
 ## Author
 
 Developed by **Anton burtasenkov** – part of my [GitHub Portfolio](https://github.com/aburtasenkov). This project highlights my skills in:
 
-* Low-level programming with C
+* Low-level programming in C
 * Command-line application design
 * Modular software architecture
-* Code optimization
+* Performance optimization
 
 ## License
 
