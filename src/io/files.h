@@ -3,10 +3,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#define FFMPEG_DECOMPOSE_VIDEO "ffmpeg -i %s -r 24 frames/frame_%%04d.jpg"
-// --> max amount of frames = 9999
-#define MAX_FRAMES 9999
-
 bool file_exists(const char * filepath);
 
 char * file_extension(const char * filepath);

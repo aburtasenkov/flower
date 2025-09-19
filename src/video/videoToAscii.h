@@ -4,9 +4,6 @@
 
 typedef struct timespec timespec_t;
 
-static void print_frames(size_t block_sz, size_t FPS);
-// print each frame of a video while accounting for wished FPS
-
 void print_video(const char * filepath, size_t block_sz, size_t FPS);
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
