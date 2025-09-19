@@ -79,10 +79,6 @@ static void sleep_frame_time_offset(size_t FPS, const timespec_t * start, const 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
-  if (!start || !end) raise_critical_error(ERROR_BAD_ARGUMENTS, "start or end is null pointer");
-  if (start->tv_sec > end->tv_sec || (start->tv_sec == end->tv_sec && start->tv_nsec > end->tv_nsec))
-    raise_critical_error(ERROR_BAD_ARGUMENTS, "start time is after end time");
-
   double frame_time = 1.0 / FPS;
   double elapsed_time = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
   double sleep_time = frame_time - elapsed_time;
