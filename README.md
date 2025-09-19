@@ -47,8 +47,7 @@ Run the program with an image or video file:
 ### Options
 
 * `-b <size>` : Set block size (controls ASCII resolution, e.g. 30 means one ASCII character is average of a 30x30 pixel block)
-* `-f <fps>`  : Frames per second (for videos)
-* `-o <file>` : Write ASCII output to a file
+* `-o <file>` : Write ASCII output to a file (only works for images for now)
 
 The order the these options doesn't matter.
 
@@ -80,7 +79,7 @@ Save ASCII art to a file:
 Play a video in ASCII:
 
 ```bash
-./main video.mp4 -b 8 -f 15
+./main video.mp4 -b 8
 ```
 
 ## 📈 Roadmap

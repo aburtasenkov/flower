@@ -13,7 +13,9 @@
 
 #define NANOSECONDS_IN_SECOND 1e9
 
-#define FFPROBE_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0:s=x \"%s\""
+#define FFPROBE_RESOLUTION_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0:s=x \"%s\""
+#define FFPROBE_FPS_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 \"%s\""
+
 #define FFMPEG_COMMAND "ffmpeg -loglevel quiet -i \"%s\" -f rawvideo -pix_fmt rgb24 -"
 
 static void get_video_resolution(ImageStbi * stbi, const char * filename)
@@ -22,12 +24,12 @@ static void get_video_resolution(ImageStbi * stbi, const char * filename)
   char command[1024];
   char buffer[128];
 
-  snprintf(command, sizeof(command), FFPROBE_COMMAND, filename);
+  snprintf(command, sizeof(command), FFPROBE_RESOLUTION_COMMAND, filename);
 
   FILE * pipe = popen(command, "r");
   if (!pipe)
   {
-    raise_critical_error(ERROR_RUNTIME, "popen failed running ffprobe");
+    raise_critical_error(ERROR_RUNTIME, "popen failed running ffprobe resolution command");
   }
 
   if (fgets(buffer, sizeof(buffer), pipe))
@@ -35,6 +37,36 @@ static void get_video_resolution(ImageStbi * stbi, const char * filename)
     sscanf(buffer, "%zux%zu", &stbi->width, &stbi->height);
   }
   pclose(pipe);
+}
+
+static double get_video_fps(const char * filename)
+// get fps of a video using ffprobe
+{
+  char command [1024];
+  char buffer[64];
+  int num, denom;
+  double fps = 0;
+
+  snprintf(command, sizeof(command), FFPROBE_FPS_COMMAND, filename);
+
+  FILE * pipe = popen(command, "r");
+  if (!pipe)
+  {
+    raise_critical_error(ERROR_RUNTIME, "popen failed running ffprobe fps command");
+  }
+
+  if (fgets(buffer, sizeof(buffer), pipe))
+  {
+    sscanf(buffer, "%d/%d", &num, &denom);
+    if (num > 0 && denom > 0)
+    {
+      fps = (double)num / denom;
+    }
+  }
+
+  pclose(pipe);
+  
+  return fps;
 }
 
 static FILE * open_ffmpeg_pipeline(const char * filepath)
@@ -50,7 +82,7 @@ static FILE * open_ffmpeg_pipeline(const char * filepath)
   return pipe;
 }
 
-static void sleep_frame_time_offset(const timespec_t * start, const timespec_t * end, size_t FPS) 
+static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, double FPS) 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
@@ -59,14 +91,14 @@ static void sleep_frame_time_offset(const timespec_t * start, const timespec_t *
   double sleep_time = frame_time - elapsed_time;
 
   if (sleep_time > 0) {
-    timespec_t sleep_duration;
+    struct timespec sleep_duration;
     sleep_duration.tv_sec = (time_t)sleep_time;
     sleep_duration.tv_nsec = (long)((sleep_time - sleep_duration.tv_sec) * NANOSECONDS_IN_SECOND);
     nanosleep(&sleep_duration, NULL);
   }
 }
 
-static void print_average_fps(const timespec_t * start, const timespec_t * end, size_t total_fps)
+static void print_average_fps(const struct timespec * start, const struct timespec * end, size_t total_fps)
 {
   double elapsed = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / 1e9;
 
@@ -77,9 +109,11 @@ static void print_average_fps(const timespec_t * start, const timespec_t * end, 
   }
 }
 
-void print_video(const char * filepath, size_t block_sz, size_t FPS) {
+void print_video(const char * filepath, size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
+
+  double FPS = get_video_fps(filepath);
 
   // create stbi object to read into
   ImageStbi stbi;
@@ -94,11 +128,8 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS) {
   // ffmpeg 3 byte image pipeline (R, G, B)
   FILE * pipe = open_ffmpeg_pipeline(filepath);
 
-  // timesteps for managing FPS cap and counting average fps
-  timespec_t frame_start, frame_end, start, end;
-  size_t total_fps = 0;
-
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  // timesteps for managing FPS cap
+  struct timespec frame_start, frame_end;
 
   // read frames from pipeline, convert them into ascii art and print
   while (fread(buffer, 1, frame_sz, pipe) == frame_sz) {
@@ -113,12 +144,8 @@ void print_video(const char * filepath, size_t block_sz, size_t FPS) {
 
     clock_gettime(CLOCK_MONOTONIC, &frame_end);
     sleep_frame_time_offset(&frame_start, &frame_end, FPS);
-    total_fps++;
   }
   
   free(buffer);
   pclose(pipe);
-
-  clock_gettime(CLOCK_MONOTONIC, &end);
-  print_average_fps(&start, &end, total_fps);
 }

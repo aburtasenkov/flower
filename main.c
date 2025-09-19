@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
 
   if (is_video(extension)) 
   {
-    print_video(config.filepath, config.block_sz, config.FPS);
+    print_video(config.filepath, config.block_sz);
   }
   else if (is_image(extension))
   {

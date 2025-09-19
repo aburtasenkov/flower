@@ -4,7 +4,6 @@
 
 typedef struct {
   char * filepath;
-  size_t FPS;
   size_t block_sz;
   char * output;
 } OPTIONS;
