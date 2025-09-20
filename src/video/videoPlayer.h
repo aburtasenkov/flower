@@ -11,6 +11,10 @@ static void get_video_resolution(ImageStbi * stbi, const char * filename);
 static double get_video_fps(const char * filename);
 // get fps of a video using ffprobe
 
+static double calculate_timestamp(size_t current_frame, double video_fps);
+// return amount of seconds passed after current_frame shown frames
+// return is floor divisioned by TIMESTAMP_ROUNDING_PRECISION
+
 static FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp);
 // open 3 bit ffpmeg frame pipeline 
 // each bit is a rgb channel
@@ -18,8 +22,6 @@ static FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp
 static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, double FPS);
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
-
-static void print_average_fps(const struct timespec * start, const struct timespec * end, size_t total_fps);
 
 static int get_keypress();
 // return current key pressed
