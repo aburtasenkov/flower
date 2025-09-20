@@ -17,14 +17,14 @@ typedef struct {
     size_t y;
 } ImagePPM;
 
-static ImagePPM * create_ppm(size_t x, size_t y);
+static ImagePPM * create_ppm(const size_t x, const size_t y);
 // create object of ImagePPM class of size x * y
 
 void free_ppm(ImagePPM * ppm);
 
-static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS]);
+static void set_pixel(ImagePPM * ppm, const size_t x, const size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS]);
 // set pixel at (x,y) to rgb value
 
-static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, size_t ascii_height);
+static ImagePPM * convert_ascii_to_ppm(const char * ascii, const size_t ascii_width, const size_t ascii_height);
 
 ImagePPM * ascii_to_ppm(const char * ascii);

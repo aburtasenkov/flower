@@ -39,7 +39,7 @@ static size_t count_columns(const char * ascii)
     return count;
 }
 
-static ImagePPM * create_ppm(size_t x, size_t y)
+static ImagePPM * create_ppm(const size_t x, const size_t y)
 // create object of ImagePPM class
 {
     if (x < 1 || y < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "Invalid image dimensions [x: %zu, y: %zu]", x, y);
@@ -64,7 +64,7 @@ void free_ppm(ImagePPM * ppm) {
     free(ppm);
 }
 
-static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
+static void set_pixel(ImagePPM * ppm, const size_t x, const size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS])
 // set pixel at (x,y) to rgb value
 {
     if (!rgb) raise_critical_error(ERROR_BAD_ARGUMENTS, "rgb is null pointer");
@@ -78,7 +78,7 @@ static void set_pixel(ImagePPM * ppm, size_t x, size_t y, const uint8_t rgb[RGB_
     ppm->data[index + 2] = rgb[2];
 }
 
-static ImagePPM * convert_ascii_to_ppm(const char * ascii, size_t ascii_width, size_t ascii_height) {
+static ImagePPM * convert_ascii_to_ppm(const char * ascii, const size_t ascii_width, const size_t ascii_height) {
     size_t image_width = GLYPH_W * ascii_width + (ascii_width - 1) * PADDING;
     size_t image_height = GLYPH_H  * ascii_height + (ascii_height - 1) * PADDING;
     size_t image_sz = image_width * image_height * RGB_COLOR_CHANNELS;
