@@ -5,6 +5,8 @@
 
 bool ESCAPE_LOOP = false;
 bool PAUSE = false;
+bool MOVE_LEFT = false;
+bool MOVE_RIGHT = false;
 
 int get_keypress()
 // return current key pressed
@@ -39,12 +41,12 @@ void check_keypress()
         if (seq[1] == 'D') 
         {
           // left arrow
-          printf("\n<-- rewind not implemented yet\n");
+          MOVE_LEFT = true;
         } 
         else if (seq[1] == 'C') 
         {
           // right arrow
-          printf("\n--> fast forward not implemented yet\n");
+          MOVE_RIGHT = true;
         }
       }
     }
