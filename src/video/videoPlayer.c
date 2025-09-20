@@ -111,15 +111,14 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
   }
 }
 
-static ImageStbi create_frame(const char * filepath)
+static ImageStbi * create_frame(const char * filepath)
 // create stbi object to read rgb frames into
 {
-  ImageStbi stbi;
-  stbi.n_components = 3;
-  get_video_resolution(&stbi, filepath);
+  ImageStbi * stbi = create_stbi(0, 0, 3);
+  get_video_resolution(stbi, filepath);
 
-  stbi.data = (unsigned char *)malloc(stbi.width * stbi.height * 3);
-  if (!stbi.data) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
+  stbi->data = (unsigned char *)malloc(stbi->width * stbi->height * 3);
+  if (!stbi->data) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
 
   return stbi;
 }
@@ -134,10 +133,10 @@ static void pause_playback(FILE * pipe)
   }
 }
 
-static size_t read_frame(ImageStbi * stbi, const size_t frame_sz, FILE * pipe)
+static size_t read_frame(ImageStbi * stbi, FILE * pipe)
 // return amount of bytes read from pipe
 {
-  return fread(stbi->data, 1, frame_sz, pipe);
+  return fread(stbi->data, 1, stbi->data_sz, pipe);
 }
 
 static void print_ui(const ImageStbi * stbi, const size_t block_sz)
@@ -167,8 +166,7 @@ void play_video(const char * filepath, size_t block_sz) {
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   double fps = get_video_fps(filepath);
-  ImageStbi stbi = create_frame(filepath);
-  size_t frame_sz = stbi.width * stbi.height * 3;
+  ImageStbi * stbi = create_frame(filepath);
   FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
   size_t current_frame = 0; // timesteps for managing FPS cap
 
@@ -190,14 +188,14 @@ void play_video(const char * filepath, size_t block_sz) {
       pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, fps));
     }
 
-    if (read_frame(&stbi, frame_sz, pipe) != frame_sz) break;
-    print_frame(&stbi, block_sz, fps);
+    if (read_frame(stbi, pipe) != stbi->data_sz) break;
+    print_frame(stbi, block_sz, fps);
     ++current_frame;
   }
-  
+
   // todo add handling for left and right arrows
 
-  free(stbi.data);
+  free_stbi(stbi);
   if (pipe) pclose(pipe);
   disable_raw_mode();
 }

@@ -23,12 +23,12 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 
-static ImageStbi create_frame(const char * filepath);
+static ImageStbi * create_frame(const char * filepath);
 // create stbi object to read rgb frames into
 
 static void pause_playback(FILE * pipe);
 
-static size_t read_frame(ImageStbi * stbi, const size_t frame_sz, FILE * pipe);
+static size_t read_frame(ImageStbi * stbi, FILE * pipe);
 // return amount of bytes read from pipe
 
 static void print_ui(const ImageStbi * stbi, const size_t block_sz);

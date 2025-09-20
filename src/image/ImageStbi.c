@@ -18,9 +18,25 @@ ImageStbi * load_stbi(const char * filepath)
   if (!data) raise_critical_error(ERROR_RUNTIME, "Cannot load image [filepath: %s]", filepath);
 
   stbi->data = data;
+  stbi->data_sz = (size_t)(width * height * n_components);
   stbi->width = (size_t)width;
   stbi->height = (size_t)height;
   stbi->n_components = (size_t)n_components;
+
+  return stbi;
+}
+
+ImageStbi * create_stbi(const size_t width, const size_t height, const size_t n_components)
+// create empty ImageStbi object
+{
+  ImageStbi * stbi = (ImageStbi *)malloc(sizeof(ImageStbi));
+  if (!stbi) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
+
+  stbi->data = NULL;
+  stbi->data_sz = (size_t)(width * height * n_components);
+  stbi->width = width;
+  stbi->height = height;
+  stbi->n_components = n_components;
 
   return stbi;
 }
