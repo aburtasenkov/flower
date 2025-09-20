@@ -10,6 +10,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+
+static bool ESCAPE_LOOP = false;
+static bool PAUSE = false;
+
+#define SLEEP_ON_PAUSE_TIME 10000
 
 #define NANOSECONDS_IN_SECOND 1e9
 
@@ -109,6 +115,51 @@ static void print_average_fps(const struct timespec * start, const struct timesp
   }
 }
 
+static int get_keypress()
+// return current key pressed
+{
+  unsigned char ch;
+  if (read(STDIN_FILENO, &ch, 1) == 1) return ch;
+  return -1;
+}
+
+static void check_keypress()
+// set flags on key presses
+{
+  int key = get_keypress();
+  if (key == -1) return; 
+
+  if (key == ' ') // space to toggle pause
+  {
+    PAUSE = !PAUSE;
+  }
+  else if (key == 'q') // quit
+  {
+    ESCAPE_LOOP = !ESCAPE_LOOP;
+  } 
+  else if (key == '\033') // arrow keys start with escape sequence
+  {
+    char seq[3];
+    if (read(STDIN_FILENO, &seq[0], 1) == 1 &&
+      read(STDIN_FILENO, &seq[1], 1) == 1) 
+      {
+      if (seq[0] == '[') 
+      {
+        if (seq[1] == 'D') 
+        {
+          // left arrow
+          printf("\n<-- rewind not implemented yet\n");
+        } 
+        else if (seq[1] == 'C') 
+        {
+          // right arrow
+          printf("\n--> fast forward not implemented yet\n");
+        }
+      }
+    }
+  }
+}
+
 void print_video(const char * filepath, size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
@@ -129,23 +180,78 @@ void print_video(const char * filepath, size_t block_sz) {
   FILE * pipe = open_ffmpeg_pipeline(filepath);
 
   // timesteps for managing FPS cap
-  struct timespec frame_start, frame_end;
+  struct timespec frame_start, frame_end, start, end;
+  size_t total_fps = 0;
+
+  enable_raw_mode();
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
 
   // read frames from pipeline, convert them into ascii art and print
   while (fread(buffer, 1, frame_sz, pipe) == frame_sz) {
+    check_keypress();
+
+    if (PAUSE)
+    {
+      usleep(SLEEP_ON_PAUSE_TIME);
+      continue;
+    }
+    if (ESCAPE_LOOP)
+    {
+      break;
+    }
+
     clock_gettime(CLOCK_MONOTONIC, &frame_start);
 
     char * ascii_frame = stbi_to_ascii(&stbi, block_sz);
 
     printf("\033[H\033[J%s", ascii_frame);
+    printf("[][<-: left arrow] [play: space] [->: right arrow]\n");
     fflush(stdout);
 
     free(ascii_frame);
 
     clock_gettime(CLOCK_MONOTONIC, &frame_end);
     sleep_frame_time_offset(&frame_start, &frame_end, FPS);
+    ++total_fps;
   }
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  print_average_fps(&start, &end, total_fps);
   
   free(buffer);
   pclose(pipe);
+
+  disable_raw_mode();
 }
+
+/*
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+$$$$$$$$$$$$$B@BB@$$$$$$$$$$$$$$
+$$$$$$$$$$$&M8%%%&8B$$$$$$$$$$$$
+$$$$$$$$$$ob#W&&M&&%B$$$$$$$$$$$
+$$$$$$$$$#waMWWMWWMW&B$$$$$$$$$$
+$$$$$$$$$Qo%#*#*####a#@$$$$$$$$$
+$$$$$$$$oQ*#abh#hoM&M#@$$$$$$$$$
+$$$$$$$$Zw###haWohoMMW8B$$$$$$$$
+$$$$$$$$QpM###&B&*MW#8&@$$$$$$$$
+$$$$$$$$0dWWMW@@BM&M#&8@$$$$$$$$
+$$$$$$$$mwMWW%B&8B8WM8%$$$$$$$$$
+$$$$$$$$oQ#&%@W8%%8@B%B$$$$$$$$$
+$$$$$$$$$JdW%BBBB@@@@B8$$$$$$$$$
+$$$$$$$$$*LaB%B@@@@@@8$$$$$$$$$$
+$$$$$$$$$$k0WBBBBWBBB$$$$$$$$$$$
+$$$$$$$$$$$#Oa8B%%%@$$$$$$$$$$$$
+$$$$$$$$$$$$$#a#&B$$$$$$$$$$$$$$
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+[<-left arrow] [play: space] [->: right arrow]
+
+todo
+menu for keys.
+pipe closing before it should
+maybe refactor functions to other files
+write functions to headers
+
+*/
