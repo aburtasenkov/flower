@@ -1,10 +1,10 @@
 #include "videoPlayer.h"
 
+#include "controls.h"
 #include "../image/ImageStbi.h"
 #include "../ascii/stbiToAscii.h"
 #include "../io/files.h"
 #include "../io/terminal.h"
-
 #include "../error.h"
 
 #include <stdlib.h>
@@ -21,9 +21,6 @@
 #define FFPROBE_FPS_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 \"%s\""
 
 #define FFMPEG_COMMAND "ffmpeg -loglevel quiet -ss %.3f -i \"%s\" -f rawvideo -pix_fmt rgb24 -"
-
-static bool ESCAPE_LOOP = false;
-static bool PAUSE = false;
 
 static void get_video_resolution(ImageStbi * stbi, const char * filename)
 // write video resolution into stbi->width and stbi->height using ffprobe
@@ -76,6 +73,15 @@ static double get_video_fps(const char * filename)
   return fps;
 }
 
+static double calculate_timestamp(size_t current_frame, double video_fps)
+// return amount of seconds passed after current_frame shown frames
+// return is floor divisioned by TIMESTAMP_ROUNDING_PRECISION
+{
+  double seconds = (double)current_frame / video_fps;
+  double factor = pow(10.0, TIMESTAMP_ROUNDING_PRECISION);
+  return round(seconds * factor) / factor;
+}
+
 static FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp)
 // open 3 bit ffpmeg frame pipeline 
 // each bit is a rgb channel
@@ -103,60 +109,6 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
     sleep_duration.tv_nsec = (long)((sleep_time - sleep_duration.tv_sec) * NANOSECONDS_IN_SECOND);
     nanosleep(&sleep_duration, NULL);
   }
-}
-
-static int get_keypress()
-// return current key pressed
-{
-  unsigned char ch;
-  if (read(STDIN_FILENO, &ch, 1) == 1) return ch;
-  return -1;
-}
-
-static void check_keypress()
-// set flags on key presses
-{
-  int key = get_keypress();
-  if (key == -1) return; 
-
-  if (key == ' ') // space to toggle pause
-  {
-    PAUSE = !PAUSE;
-  }
-  else if (key == 'q') // quit
-  {
-    ESCAPE_LOOP = !ESCAPE_LOOP;
-  } 
-  else if (key == '\033') // arrow keys start with escape sequence
-  {
-    char seq[3];
-    if (read(STDIN_FILENO, &seq[0], 1) == 1 &&
-      read(STDIN_FILENO, &seq[1], 1) == 1) 
-      {
-      if (seq[0] == '[') 
-      {
-        if (seq[1] == 'D') 
-        {
-          // left arrow
-          printf("\n<-- rewind not implemented yet\n");
-        } 
-        else if (seq[1] == 'C') 
-        {
-          // right arrow
-          printf("\n--> fast forward not implemented yet\n");
-        }
-      }
-    }
-  }
-}
-
-static double calculate_timestamp(size_t current_frame, double video_fps)
-// return amount of seconds passed after current_frame shown frames
-// return is floor divisioned by TIMESTAMP_ROUNDING_PRECISION
-{
-  double seconds = (double)current_frame / video_fps;
-  double factor = pow(10.0, TIMESTAMP_ROUNDING_PRECISION);
-  return round(seconds * factor) / factor;
 }
 
 void play_video(const char * filepath, size_t block_sz) {
@@ -212,7 +164,7 @@ void play_video(const char * filepath, size_t block_sz) {
     char * ascii_frame = stbi_to_ascii(&stbi, block_sz);
 
     printf("\033[H\033[J%s", ascii_frame);
-    printf("[quit: ESC][<-: left arrow] [play: space] [->: right arrow]\n");
+    printf("[quit: q] [<-: left arrow] [play: space] [->: right arrow]\n");
     fflush(stdout);
 
     free(ascii_frame);
