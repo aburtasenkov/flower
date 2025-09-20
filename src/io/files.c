@@ -57,7 +57,7 @@ char * file_extension(const char * filepath)
   return extension;
 }
 
-void write_image(const char * filepath, const char * output_path, size_t block_sz)
+void write_image(const char * filepath, const char * output_path, const size_t block_sz)
 // convert image at filepath to ascii and write the resulting image in output_path
 // if file format is not supported, function will cause an error
 {
@@ -85,7 +85,7 @@ void write_image(const char * filepath, const char * output_path, size_t block_s
   //didn't forget "free(extension);", its just not needed as raise_critical_error will stop control flow and OS will cleanup
 }
 
-static void write_ppm(const char * filepath, const char * output_path, size_t block_sz)
+static void write_ppm(const char * filepath, const char * output_path, const size_t block_sz)
 // convert image at filepath to ppm file
 {
   // load stbi image and convert it to ascii
@@ -117,7 +117,7 @@ static void write_ppm(const char * filepath, const char * output_path, size_t bl
   free_ppm(ppm);
 }
 
-static void write_txt(const char * filepath, const char * output_path, size_t block_sz)
+static void write_txt(const char * filepath, const char * output_path, const size_t block_sz)
 // convert image at filepath to txt file
 {
   // load stbi image and convert it to ascii image
