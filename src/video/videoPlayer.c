@@ -1,4 +1,4 @@
-#include "videoToAscii.h"
+#include "videoPlayer.h"
 
 #include "../image/ImageStbi.h"
 #include "../ascii/stbiToAscii.h"
@@ -160,7 +160,7 @@ static void check_keypress()
   }
 }
 
-void print_video(const char * filepath, size_t block_sz) {
+void play_video(const char * filepath, size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 

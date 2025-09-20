@@ -1,5 +1,5 @@
 #include "src/ascii/stbiToAscii.h"
-#include "src/video/videoToAscii.h"
+#include "src/video/videoPlayer.h"
 #include "src/config/Config.h"
 #include "src/io/terminal.h"
 #include "src/error.h"
@@ -22,7 +22,7 @@ int main(int argc, char ** argv) {
 
   if (is_video(extension)) 
   {
-    print_video(config.filepath, config.block_sz);
+    play_video(config.filepath, config.block_sz);
   }
   else if (is_image(extension))
   {
