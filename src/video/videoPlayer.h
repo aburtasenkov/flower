@@ -23,11 +23,8 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 
-static int get_keypress();
-// return current key pressed
-
-static void check_keypress();
-// set flags on key presses
+static ImageStbi create_frame(const char * filepath);
+// create stbi object to read rgb frames into
 
 void play_video(const char * filepath, size_t block_sz);
 // convert a mp4 video into a sequence of frames in "frames" folder

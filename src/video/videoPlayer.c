@@ -111,28 +111,31 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
   }
 }
 
+static ImageStbi create_frame(const char * filepath)
+// create stbi object to read rgb frames into
+{
+  ImageStbi stbi;
+  stbi.n_components = 3;
+  get_video_resolution(&stbi, filepath);
+
+  stbi.data = (unsigned char *)malloc(stbi.width * stbi.height * 3);
+  if (!stbi.data) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
+
+  return stbi;
+}
+
 void play_video(const char * filepath, size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   double fps = get_video_fps(filepath);
 
-  // create stbi object to read into
-  ImageStbi stbi;
-  stbi.n_components = 3;
-  get_video_resolution(&stbi, filepath);
-  
+  ImageStbi stbi = create_frame(filepath);
   size_t frame_sz = stbi.width * stbi.height * 3;
-  unsigned char * buffer = (unsigned char *)malloc(frame_sz);
-  if (!buffer) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
-  stbi.data = buffer;
 
-  // ffmpeg 3 byte image pipeline (R, G, B)
-  FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0);
+  FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
 
-  // timesteps for managing FPS cap
-  struct timespec frame_start, frame_end;
-  size_t current_frame = 0;
+  size_t current_frame = 0; // timesteps for managing FPS cap
 
   enable_raw_mode();
 
@@ -156,9 +159,10 @@ void play_video(const char * filepath, size_t block_sz) {
       pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, fps));
     }
 
-    size_t read_bytes = fread(buffer, 1, frame_sz, pipe);
+    size_t read_bytes = fread(stbi.data, 1, frame_sz, pipe);
     if (read_bytes != frame_sz) break;
 
+    struct timespec frame_start;
     clock_gettime(CLOCK_MONOTONIC, &frame_start);
 
     char * ascii_frame = stbi_to_ascii(&stbi, block_sz);
@@ -166,15 +170,16 @@ void play_video(const char * filepath, size_t block_sz) {
     printf("\033[H\033[J%s", ascii_frame);
     printf("[quit: q] [<-: left arrow] [play: space] [->: right arrow]\n");
     fflush(stdout);
-
     free(ascii_frame);
 
+    struct timespec frame_end;
     clock_gettime(CLOCK_MONOTONIC, &frame_end);
+
     sleep_frame_time_offset(&frame_start, &frame_end, fps);
     ++current_frame;
   }
 
-  free(buffer);
+  free(stbi.data);
   pclose(pipe);
   disable_raw_mode();
 }
