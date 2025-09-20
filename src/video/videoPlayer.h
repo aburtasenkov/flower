@@ -11,7 +11,7 @@ static void get_video_resolution(ImageStbi * stbi, const char * filename);
 static double get_video_fps(const char * filename);
 // get fps of a video using ffprobe
 
-static FILE * open_ffmpeg_pipeline(const char * filepath);
+static FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp);
 // open 3 bit ffpmeg frame pipeline 
 // each bit is a rgb channel
 
