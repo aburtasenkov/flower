@@ -148,6 +148,7 @@ void play_video(const char * filepath, size_t block_sz) {
     if (PAUSE)
     {
       pclose(pipe);
+      pipe = NULL;
       while (PAUSE && !ESCAPE_LOOP)
       {
         check_keypress();
@@ -180,6 +181,6 @@ void play_video(const char * filepath, size_t block_sz) {
   }
 
   free(stbi.data);
-  pclose(pipe);
+  if (pipe) pclose(pipe);
   disable_raw_mode();
 }
