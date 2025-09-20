@@ -95,7 +95,7 @@ static FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp
   return pipe;
 }
 
-static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, double FPS) 
+static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, const double FPS) 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
@@ -161,7 +161,7 @@ static void print_frame(const ImageStbi * stbi,  const size_t block_sz, const si
   sleep_frame_time_offset(&frame_start, &frame_end, fps);
 }
 
-void play_video(const char * filepath, size_t block_sz) {
+void play_video(const char * filepath, const size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
