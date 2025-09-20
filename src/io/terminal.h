@@ -18,3 +18,9 @@ int execute_command(const char * command);
 bool is_video(const char * file_extension);
 
 bool is_image(const char * file_extension);
+
+void disable_raw_mode();
+// reset stdin flags
+
+void enable_raw_mode();
+// make stdin non blocking, disable canonical and echo modes

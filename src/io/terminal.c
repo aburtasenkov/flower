@@ -4,6 +4,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <termios.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+static struct termios orig_termios;
+static int orig_fl;
 
 int execute_command(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
@@ -51,4 +57,27 @@ bool is_image(const char * file_extension) {
   }
 
   return false;
+}
+
+void disable_raw_mode()
+// reset stdin flags
+{
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+  fcntl(STDIN_FILENO, F_SETFL, orig_fl); // restore original file flags
+}
+
+void enable_raw_mode() 
+// make stdin non blocking, disable canonical and echo modes
+{
+  tcgetattr(STDIN_FILENO, &orig_termios);
+  orig_fl = fcntl(STDIN_FILENO, F_GETFL);
+
+  atexit(disable_raw_mode);
+
+  struct termios raw = orig_termios;
+  raw.c_lflag &= ~(ICANON | ECHO); // disable canonical mode & echo
+  tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+
+  // make stdin non-blocking
+  fcntl(STDIN_FILENO, F_SETFL, orig_fl | O_NONBLOCK);
 }
