@@ -19,7 +19,7 @@ OPTIONS default_config() {
   return config;
 }
 
-void parse_options(OPTIONS * config, int argc, char ** argv) {
+void parse_options(OPTIONS * config, const int argc, char * const * argv) {
   if (argc < ARGC_MIN) raise_critical_error(ERROR_BAD_ARGUMENTS, "Arguments not specified");
 
   config->filepath = argv[MEDIAPATH_ARGV_INDEX];
