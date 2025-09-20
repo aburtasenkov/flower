@@ -81,7 +81,7 @@ static const Glyph FONT[] = {
 
 #define FONT_COUNT sizeof(FONT) / sizeof(FONT[0])
 
-const uint8_t * glyph_rows(char c) 
+const uint8_t * glyph_rows(const char c) 
 // return binary rows of an ascii char for further image creation
 {
     for (size_t i = 0; i < FONT_COUNT; ++i) {
