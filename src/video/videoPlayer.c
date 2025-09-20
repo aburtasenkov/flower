@@ -129,12 +129,9 @@ void play_video(const char * filepath, size_t block_sz) {
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   double fps = get_video_fps(filepath);
-
   ImageStbi stbi = create_frame(filepath);
   size_t frame_sz = stbi.width * stbi.height * 3;
-
   FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
-
   size_t current_frame = 0; // timesteps for managing FPS cap
 
   enable_raw_mode();
