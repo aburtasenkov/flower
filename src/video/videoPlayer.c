@@ -73,7 +73,7 @@ static double get_video_fps(const char * filename)
   return fps;
 }
 
-static double calculate_timestamp(size_t current_frame, double video_fps)
+static double calculate_timestamp(const size_t current_frame, const double video_fps)
 // return amount of seconds passed after current_frame shown frames
 // return is floor divisioned by TIMESTAMP_ROUNDING_PRECISION
 {
@@ -124,6 +124,44 @@ static ImageStbi create_frame(const char * filepath)
   return stbi;
 }
 
+static void pause_playback(FILE * pipe)
+{
+  pclose(pipe);
+  while (PAUSE && !ESCAPE_LOOP)
+  {
+    check_keypress();
+    usleep(SLEEP_ON_PAUSE_TIME);
+  }
+}
+
+static size_t read_frame(ImageStbi * stbi, const size_t frame_sz, FILE * pipe)
+// return amount of bytes read from pipe
+{
+  return fread(stbi->data, 1, frame_sz, pipe);
+}
+
+static void print_ui(const ImageStbi * stbi, const size_t block_sz)
+{
+  char * ascii_frame = stbi_to_ascii(stbi, block_sz);
+
+  printf("\033[H\033[J%s", ascii_frame);
+  printf("[quit: q] [<-: left arrow] [play: space] [->: right arrow]\n");
+  fflush(stdout);
+  free(ascii_frame);
+}
+
+static void print_frame(const ImageStbi * stbi,  const size_t block_sz, const size_t fps)
+{
+  struct timespec frame_start, frame_end;
+  clock_gettime(CLOCK_MONOTONIC, &frame_start);
+
+  print_ui(stbi, block_sz);
+
+  clock_gettime(CLOCK_MONOTONIC, &frame_end);
+
+  sleep_frame_time_offset(&frame_start, &frame_end, fps);
+}
+
 void play_video(const char * filepath, size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
@@ -136,46 +174,28 @@ void play_video(const char * filepath, size_t block_sz) {
 
   enable_raw_mode();
 
-  // read frames from pipeline, convert them into ascii art and print
   while (true) 
   {
     check_keypress();
     
+    // handle key presses
     if (ESCAPE_LOOP) break;
     if (PAUSE)
     {
-      pclose(pipe);
+      pause_playback(pipe);
       pipe = NULL;
-      while (PAUSE && !ESCAPE_LOOP)
-      {
-        check_keypress();
-        usleep(SLEEP_ON_PAUSE_TIME);
-      }
 
       if (ESCAPE_LOOP) break;
 
       pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, fps));
     }
 
-    size_t read_bytes = fread(stbi.data, 1, frame_sz, pipe);
-    if (read_bytes != frame_sz) break;
-
-    struct timespec frame_start;
-    clock_gettime(CLOCK_MONOTONIC, &frame_start);
-
-    char * ascii_frame = stbi_to_ascii(&stbi, block_sz);
-
-    printf("\033[H\033[J%s", ascii_frame);
-    printf("[quit: q] [<-: left arrow] [play: space] [->: right arrow]\n");
-    fflush(stdout);
-    free(ascii_frame);
-
-    struct timespec frame_end;
-    clock_gettime(CLOCK_MONOTONIC, &frame_end);
-
-    sleep_frame_time_offset(&frame_start, &frame_end, fps);
+    if (read_frame(&stbi, frame_sz, pipe) != frame_sz) break;
+    print_frame(&stbi, block_sz, fps);
     ++current_frame;
   }
+  
+  // todo add handling for left and right arrows
 
   free(stbi.data);
   if (pipe) pclose(pipe);

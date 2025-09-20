@@ -26,6 +26,15 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
 static ImageStbi create_frame(const char * filepath);
 // create stbi object to read rgb frames into
 
+static void pause_playback(FILE * pipe);
+
+static size_t read_frame(ImageStbi * stbi, const size_t frame_sz, FILE * pipe);
+// return amount of bytes read from pipe
+
+static void print_ui(const ImageStbi * stbi, const size_t block_sz);
+
+static void print_frame(const ImageStbi * stbi,  const size_t block_sz, const size_t fps);
+
 void play_video(const char * filepath, size_t block_sz);
 // convert a mp4 video into a sequence of frames in "frames" folder
 // and print them all out frame by frame in the terminal in ascii format
