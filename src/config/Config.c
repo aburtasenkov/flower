@@ -36,7 +36,7 @@ void parse_options(OPTIONS * config, int argc, char ** argv) {
     }
     else 
     {
-      printf("Warning: Unknown option '%s' ignored\n", argv[i]);
+      raise_noncritical_error(ERROR_BAD_ARGUMENTS, "Warning: Unknown option '%s' ignored\n", argv[i]);
     }
   }
 }
