@@ -126,7 +126,7 @@ static ImageStbi * create_frame(const char * filepath)
   return stbi;
 }
 
-static size_t read_frame(ImageStbi * stbi, FILE * pipe)
+static size_t read_frame(FILE * pipe, ImageStbi * stbi)
 // return amount of bytes read from pipe
 {
   return fread(stbi->data, 1, stbi->data_sz, pipe);
@@ -186,7 +186,7 @@ void play_video(const char * filepath, const size_t block_sz) {
       pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, fps));
     }
 
-    if (read_frame(stbi, pipe) != stbi->data_sz) break;
+    if (read_frame(pipe, stbi) != stbi->data_sz) break;
     print_frame(stbi, block_sz, fps);
     ++current_frame;
   }
