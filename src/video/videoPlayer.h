@@ -5,7 +5,12 @@
 #include <time.h>
 #include <stdio.h>
 
-static void get_video_resolution(ImageStbi * stbi, const char * filename);
+typedef struct {
+  size_t width;
+  size_t height;
+} videoDimensions;
+
+static videoDimensions get_video_resolution(const char * filename);
 // write video resolution into stbi->width and stbi->height using ffprobe
 
 static double get_video_fps(const char * filename);

@@ -22,11 +22,12 @@
 
 #define FFMPEG_COMMAND "ffmpeg -loglevel quiet -ss %.3f -i \"%s\" -f rawvideo -pix_fmt rgb24 -"
 
-static void get_video_resolution(ImageStbi * stbi, const char * filename)
+static videoDimensions get_video_resolution(const char * filename)
 // write video resolution into stbi->width and stbi->height using ffprobe
 {
   char command[1024];
   char buffer[128];
+  videoDimensions dimensions;
 
   snprintf(command, sizeof(command), FFPROBE_RESOLUTION_COMMAND, filename);
 
@@ -38,9 +39,11 @@ static void get_video_resolution(ImageStbi * stbi, const char * filename)
 
   if (fgets(buffer, sizeof(buffer), pipe))
   {
-    sscanf(buffer, "%zux%zu", &stbi->width, &stbi->height);
+    sscanf(buffer, "%zux%zu", &dimensions.width, &dimensions.height);
   }
   pclose(pipe);
+
+  return dimensions;
 }
 
 static double get_video_fps(const char * filename)
@@ -114,10 +117,10 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
 static ImageStbi * create_frame(const char * filepath)
 // create stbi object to read rgb frames into
 {
-  ImageStbi * stbi = create_stbi(0, 0, 3);
-  get_video_resolution(stbi, filepath);
+  videoDimensions dimensions = get_video_resolution(filepath);
+  ImageStbi * stbi = create_stbi(dimensions.width, dimensions.height, 3);
 
-  stbi->data = (unsigned char *)malloc(stbi->width * stbi->height * 3);
+  stbi->data = (unsigned char *)malloc(stbi->data_sz);
   if (!stbi->data) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
 
   return stbi;
