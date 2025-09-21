@@ -126,16 +126,6 @@ static ImageStbi * create_frame(const char * filepath)
   return stbi;
 }
 
-static void pause_playback(FILE * pipe)
-{
-  pclose(pipe);
-  while (PAUSE && !ESCAPE_LOOP)
-  {
-    check_keypress();
-    usleep(SLEEP_ON_PAUSE_TIME);
-  }
-}
-
 static size_t read_frame(ImageStbi * stbi, FILE * pipe)
 // return amount of bytes read from pipe
 {
@@ -183,8 +173,13 @@ void play_video(const char * filepath, const size_t block_sz) {
     if (ESCAPE_LOOP) break;
     if (PAUSE)
     {
-      pause_playback(pipe);
+      pclose(pipe);
       pipe = NULL;
+      while (PAUSE && !ESCAPE_LOOP)
+      {
+        check_keypress();
+        usleep(SLEEP_ON_PAUSE_TIME);
+      }
 
       if (ESCAPE_LOOP) break;
 
