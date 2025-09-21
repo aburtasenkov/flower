@@ -17,7 +17,7 @@ int get_keypress()
 }
 
 void check_keypress()
-// set flags on key presses git commit -m "Moved video player controls to their own header file"
+// set flags on key presses
 {
   int key = get_keypress();
   if (key == -1) return; 
