@@ -12,14 +12,14 @@
 
 #define TIMESTAMP_ROUNDING_PRECISION 3
 
-videoDimensions get_video_resolution(const char * filename)
+videoDimensions get_video_resolution(const char * filepath)
 // write video resolution into stbi->width and stbi->height using ffprobe
 {
   char command[1024];
   char buffer[128];
   videoDimensions dimensions;
 
-  snprintf(command, sizeof(command), FFPROBE_RESOLUTION_COMMAND, filename);
+  snprintf(command, sizeof(command), FFPROBE_RESOLUTION_COMMAND, filepath);
 
   FILE * pipe = popen(command, "r");
   if (!pipe)
@@ -36,7 +36,7 @@ videoDimensions get_video_resolution(const char * filename)
   return dimensions;
 }
 
-double get_video_fps(const char * filename)
+double get_video_fps(const char * filepath)
 // get fps of a video using ffprobe
 {
   char command [1024];
@@ -44,7 +44,7 @@ double get_video_fps(const char * filename)
   int num, denom;
   double fps = 0;
 
-  snprintf(command, sizeof(command), FFPROBE_FPS_COMMAND, filename);
+  snprintf(command, sizeof(command), FFPROBE_FPS_COMMAND, filepath);
 
   FILE * pipe = popen(command, "r");
   if (!pipe)
@@ -64,6 +64,15 @@ double get_video_fps(const char * filename)
   pclose(pipe);
   
   return fps;
+}
+
+videoData get_video_information(const char * filepath)
+// get all infos needed about a video located at filepath
+{
+  videoData data = {0};
+  data.dimensions = get_video_resolution(filepath);
+  data.fps = get_video_fps(filepath);
+  return data;
 }
 
 double calculate_timestamp(const size_t current_frame, const double video_fps)

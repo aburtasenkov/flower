@@ -9,11 +9,19 @@ typedef struct {
   size_t height;
 } videoDimensions;
 
-videoDimensions get_video_resolution(const char * filename);
+typedef struct {
+  videoDimensions dimensions;
+  size_t fps;
+} videoData;
+
+static videoDimensions get_video_resolution(const char * filepath);
 // write video resolution into stbi->width and stbi->height using ffprobe
 
-double get_video_fps(const char * filename);
+static double get_video_fps(const char * filepath);
 // get fps of a video using ffprobe
+
+videoData get_video_information(const char * filepath);
+// get all infos needed about a video located at filepath
 
 double calculate_timestamp(const size_t current_frame, const double video_fps);
 // return amount of seconds passed after current_frame shown frames
