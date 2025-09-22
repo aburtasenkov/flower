@@ -32,8 +32,12 @@ ImageStbi * create_stbi(const size_t width, const size_t height, const size_t n_
   ImageStbi * stbi = (ImageStbi *)malloc(sizeof(ImageStbi));
   if (!stbi) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image [size in bytes: %zu]", sizeof(ImageStbi));
 
-  stbi->data = NULL;
   stbi->data_sz = (size_t)(width * height * n_components);
+  if (stbi->data_sz > 0)
+  {
+    stbi->data = (unsigned char *)malloc(stbi->data_sz);
+    if (!stbi->data) raise_critical_error(ERROR_RUNTIME, "Cannot allocate enough memory for stbi Image's data buffer [size in bytes: %zu]", stbi->data_sz); 
+  }
   stbi->width = width;
   stbi->height = height;
   stbi->n_components = n_components;
