@@ -97,18 +97,6 @@ FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp)
   return pipe;
 }
 
-ImageStbi * create_frame(const char * filepath)
-// create stbi object to read rgb frames into
-{
-  videoDimensions dimensions = get_video_resolution(filepath);
-  ImageStbi * stbi = create_stbi(dimensions.width, dimensions.height, 3);
-
-  stbi->data = (unsigned char *)malloc(stbi->data_sz);
-  if (!stbi->data) raise_critical_error(ERROR_RUNTIME, "cannot allocate frame buffer");  
-
-  return stbi;
-}
-
 size_t read_frame(FILE * pipe, ImageStbi * stbi)
 // return amount of bytes read from pipe
 {

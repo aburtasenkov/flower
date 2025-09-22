@@ -59,8 +59,8 @@ void play_video(const char * filepath, const size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
-  double fps = get_video_fps(filepath);
-  ImageStbi * stbi = create_frame(filepath);
+  videoData video_data = get_video_information(filepath);
+  ImageStbi * stbi = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
   FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
   size_t current_frame = 0; // timesteps for managing FPS cap
 
@@ -84,11 +84,11 @@ void play_video(const char * filepath, const size_t block_sz) {
 
       if (ESCAPE_LOOP) break;
 
-      pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, fps));
+      pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, video_data.fps));
     }
 
     if (read_frame(pipe, stbi) != stbi->data_sz) break;
-    print_frame(stbi, block_sz, fps);
+    print_frame(stbi, block_sz, video_data.fps);
     ++current_frame;
   }
 
