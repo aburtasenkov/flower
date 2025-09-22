@@ -17,7 +17,15 @@
 #define SLEEP_ON_PAUSE_TIME 10000
 #define NANOSECONDS_IN_SECOND 1e9
 
-static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, const double FPS) 
+static size_t BLOCK_SZ = 1;
+static double FPS = 0;
+
+static ImageStbi * FRAME = NULL;
+static size_t FRAMECOUNT = 0;
+
+static FILE * DATA_PIPELINE = NULL;
+
+static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end) 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 {
@@ -33,9 +41,9 @@ static void sleep_frame_time_offset(const struct timespec * start, const struct 
   }
 }
 
-static void print_ui(const ImageStbi * stbi, const size_t block_sz)
+static void print_ui()
 {
-  char * ascii_frame = stbi_to_ascii(stbi, block_sz);
+  char * ascii_frame = stbi_to_ascii(FRAME, BLOCK_SZ);
 
   printf("\033[H\033[J%s", ascii_frame);
   printf("[quit: q] [<-: left arrow] [play: space] [->: right arrow]\n");
@@ -43,26 +51,28 @@ static void print_ui(const ImageStbi * stbi, const size_t block_sz)
   free(ascii_frame);
 }
 
-static void print_frame(const ImageStbi * stbi,  const size_t block_sz, const size_t fps)
+static void print_frame()
 {
   struct timespec frame_start, frame_end;
   clock_gettime(CLOCK_MONOTONIC, &frame_start);
 
-  print_ui(stbi, block_sz);
+  print_ui(FRAME, BLOCK_SZ);
 
   clock_gettime(CLOCK_MONOTONIC, &frame_end);
 
-  sleep_frame_time_offset(&frame_start, &frame_end, fps);
+  sleep_frame_time_offset(&frame_start, &frame_end);
 }
 
 void play_video(const char * filepath, const size_t block_sz) {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
-  videoData video_data = get_video_information(filepath);
-  ImageStbi * stbi = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
-  FILE * pipe = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
-  size_t current_frame = 0; // timesteps for managing FPS cap
+  BLOCK_SZ = block_sz;
+  {
+    videoData video_data = get_video_information(filepath);
+    FRAME = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
+  }
+  DATA_PIPELINE = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
 
   enable_raw_mode();
 
@@ -74,8 +84,8 @@ void play_video(const char * filepath, const size_t block_sz) {
     if (ESCAPE_LOOP) break;
     if (PAUSE)
     {
-      pclose(pipe);
-      pipe = NULL;
+      pclose(DATA_PIPELINE);
+      DATA_PIPELINE = NULL;
       while (PAUSE && !ESCAPE_LOOP)
       {
         check_keypress();
@@ -84,17 +94,17 @@ void play_video(const char * filepath, const size_t block_sz) {
 
       if (ESCAPE_LOOP) break;
 
-      pipe = open_ffmpeg_pipeline(filepath, calculate_timestamp(current_frame, video_data.fps));
+      DATA_PIPELINE = open_ffmpeg_pipeline(filepath, calculate_timestamp(FRAMECOUNT, FPS));
     }
 
-    if (read_frame(pipe, stbi) != stbi->data_sz) break;
-    print_frame(stbi, block_sz, video_data.fps);
-    ++current_frame;
+    if (read_frame(DATA_PIPELINE, FRAME) != FRAME->data_sz) break;
+    print_frame(FRAME, BLOCK_SZ, FPS);
+    ++FRAMECOUNT;
   }
 
   // todo add handling for left and right arrows
 
-  free_stbi(stbi);
-  if (pipe) pclose(pipe);
+  free_stbi(FRAME);
+  if (DATA_PIPELINE) pclose(DATA_PIPELINE);
   disable_raw_mode();
 }

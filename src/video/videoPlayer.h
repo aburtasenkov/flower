@@ -5,7 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 
-static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end, const double FPS);
+static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end);
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
 
