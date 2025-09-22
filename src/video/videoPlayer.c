@@ -17,6 +17,8 @@
 #define SLEEP_ON_PAUSE_TIME 10000
 #define NANOSECONDS_IN_SECOND 1e9
 
+static char * VIDEO = NULL; 
+
 static size_t BLOCK_SZ = 1;
 static double FPS = 0;
 
@@ -63,17 +65,8 @@ static void print_frame()
   sleep_frame_time_offset(&frame_start, &frame_end);
 }
 
-void play_video(const char * filepath, const size_t block_sz) {
-  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
-
-  BLOCK_SZ = block_sz;
-  {
-    videoData video_data = get_video_information(filepath);
-    FRAME = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
-  }
-  DATA_PIPELINE = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
-
+static void main_loop()
+{
   enable_raw_mode();
 
   while (true) 
@@ -94,7 +87,7 @@ void play_video(const char * filepath, const size_t block_sz) {
 
       if (ESCAPE_LOOP) break;
 
-      DATA_PIPELINE = open_ffmpeg_pipeline(filepath, calculate_timestamp(FRAMECOUNT, FPS));
+      DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO, calculate_timestamp(FRAMECOUNT, FPS));
     }
 
     if (read_frame(DATA_PIPELINE, FRAME) != FRAME->data_sz) break;
@@ -102,9 +95,28 @@ void play_video(const char * filepath, const size_t block_sz) {
     ++FRAMECOUNT;
   }
 
+  disable_raw_mode();
+}
+
+void play_video(const char * filepath, const size_t block_sz) {
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
+
+  // prepare data for video player
+  VIDEO = (char *)malloc(strlen(filepath) + 1);
+  memcpy(VIDEO, filepath, strlen(filepath) + 1);
+  BLOCK_SZ = block_sz;
+  {
+    videoData video_data = get_video_information(filepath);
+    FRAME = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
+  }
+  DATA_PIPELINE = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
+
+  main_loop();
+
   // todo add handling for left and right arrows
 
   free_stbi(FRAME);
   if (DATA_PIPELINE) pclose(DATA_PIPELINE);
-  disable_raw_mode();
+  free(VIDEO);
 }
