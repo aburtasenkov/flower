@@ -27,6 +27,8 @@ static size_t FRAMECOUNT = 0;
 
 static FILE * DATA_PIPELINE = NULL;
 
+#define SEEK_SECONDS 1
+
 static void sleep_frame_time_offset(const struct timespec * start, const struct timespec * end) 
 // sleep until the next frame should be displayed
 // start and end are the times of the current frame processing
@@ -65,6 +67,34 @@ static void print_frame()
   sleep_frame_time_offset(&frame_start, &frame_end);
 }
 
+void seek_time(const double seconds)
+// seek seconds backwards or forward
+// if current timestamp if smaller than amount of frames that are seeked back - go back to 0.0 seconds
+{
+  int frame_diff = (int)(FPS * seconds);
+  printf("Seeking %d frames\n", frame_diff);
+
+  if (frame_diff < 0 && FRAMECOUNT < abs(frame_diff))
+  {
+    raise_noncritical_error(ERROR_EXTERNAL, "Cannot seek more frames back than current timestamp, going back to start of video");
+    FRAMECOUNT = 0;
+  }
+  else FRAMECOUNT += frame_diff;
+
+  if (DATA_PIPELINE) pclose(DATA_PIPELINE);
+  DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO, calculate_timestamp(FRAMECOUNT, FPS));
+
+  size_t read_bytes = read_frame(DATA_PIPELINE, FRAME);
+  if (read_bytes != FRAME->data_sz)
+  {
+    raise_noncritical_error(ERROR_EXTERNAL, "End of video or failed seek");
+    ESCAPE_LOOP = true;
+    return;
+  }
+
+  print_ui();
+}
+
 static void main_loop()
 {
   enable_raw_mode();
@@ -82,6 +112,16 @@ static void main_loop()
       while (PAUSE && !ESCAPE_LOOP)
       {
         check_keypress();
+        if (MOVE_RIGHT) 
+        {
+          seek_time(SEEK_SECONDS);
+          MOVE_RIGHT = false;
+        }
+        if (MOVE_LEFT) 
+        {
+          seek_time(-SEEK_SECONDS);
+          MOVE_LEFT = false;
+        }
         usleep(SLEEP_ON_PAUSE_TIME);
       }
 
@@ -90,8 +130,19 @@ static void main_loop()
       DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO, calculate_timestamp(FRAMECOUNT, FPS));
     }
 
+    if (MOVE_RIGHT) 
+    {
+      seek_time(SEEK_SECONDS);
+      MOVE_RIGHT = false;
+    }
+    if (MOVE_LEFT) 
+    {
+      seek_time(-SEEK_SECONDS);
+      MOVE_LEFT = false;
+    }
+
     if (read_frame(DATA_PIPELINE, FRAME) != FRAME->data_sz) break;
-    print_frame(FRAME, BLOCK_SZ, FPS);
+    print_frame();
     ++FRAMECOUNT;
   }
 
@@ -109,6 +160,7 @@ void play_video(const char * filepath, const size_t block_sz) {
   {
     videoData video_data = get_video_information(filepath);
     FRAME = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
+    FPS = video_data.fps;
   }
   DATA_PIPELINE = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
 
