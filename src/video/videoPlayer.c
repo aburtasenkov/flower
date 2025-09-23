@@ -27,7 +27,11 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
   if (!video_player) raise_critical_error(ERROR_RUNTIME, "Could not allocate enough memory for object of class VideoPlayer");
 
   video_player->filepath = (char *)malloc(strlen(filepath) + 1);
-  if (!video_player->filepath) raise_critical_error(ERROR_RUNTIME, "could not allocate enough memory for copy of video's filepath");
+  if (!video_player->filepath) 
+  {
+    free(video_player);
+    raise_critical_error(ERROR_RUNTIME, "could not allocate enough memory for copy of video's filepath");
+  }
   memcpy(video_player->filepath, filepath, strlen(filepath) + 1);
 
   video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
@@ -111,7 +115,11 @@ void seek_time(VideoPlayer * video_player, const double seconds)
   }
   else video_player->frame_count += frame_diff;
 
-  if (video_player->data_pipeline) pclose(video_player->data_pipeline);
+  if (video_player->data_pipeline) 
+  {
+    pclose(video_player->data_pipeline);
+    video_player->data_pipeline = NULL;
+  }
   video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
 
   size_t read_bytes = read_frame(video_player->data_pipeline, video_player->frame);
