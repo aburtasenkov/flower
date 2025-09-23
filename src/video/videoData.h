@@ -11,7 +11,7 @@ typedef struct {
 
 typedef struct {
   videoDimensions dimensions;
-  size_t fps;
+  double fps;
 } videoData;
 
 static videoDimensions get_video_resolution(const char * filepath);
