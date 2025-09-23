@@ -60,7 +60,7 @@ static void print_frame()
   struct timespec frame_start, frame_end;
   clock_gettime(CLOCK_MONOTONIC, &frame_start);
 
-  print_ui(FRAME, BLOCK_SZ);
+  print_ui();
 
   clock_gettime(CLOCK_MONOTONIC, &frame_end);
 
