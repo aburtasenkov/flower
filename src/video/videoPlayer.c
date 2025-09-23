@@ -17,7 +17,7 @@
 #define SLEEP_ON_PAUSE_TIME 10000
 #define NANOSECONDS_IN_SECOND 1e9
 
-static char * VIDEO = NULL; 
+static char * VIDEO_PATH = NULL; 
 
 static size_t BLOCK_SZ = 1;
 static double FPS = 0;
@@ -82,7 +82,7 @@ void seek_time(const double seconds)
   else FRAMECOUNT += frame_diff;
 
   if (DATA_PIPELINE) pclose(DATA_PIPELINE);
-  DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO, calculate_timestamp(FRAMECOUNT, FPS));
+  DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO_PATH, calculate_timestamp(FRAMECOUNT, FPS));
 
   size_t read_bytes = read_frame(DATA_PIPELINE, FRAME);
   if (read_bytes != FRAME->data_sz)
@@ -127,7 +127,7 @@ static void main_loop()
 
       if (ESCAPE_LOOP) break;
 
-      DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO, calculate_timestamp(FRAMECOUNT, FPS));
+      DATA_PIPELINE = open_ffmpeg_pipeline(VIDEO_PATH, calculate_timestamp(FRAMECOUNT, FPS));
     }
 
     if (MOVE_RIGHT) 
@@ -154,8 +154,10 @@ void play_video(const char * filepath, const size_t block_sz) {
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   // prepare data for video player
-  VIDEO = (char *)malloc(strlen(filepath) + 1);
-  memcpy(VIDEO, filepath, strlen(filepath) + 1);
+  VIDEO_PATH = (char *)malloc(strlen(filepath) + 1);
+  if (!VIDEO_PATH) raise_critical_error(ERROR_RUNTIME, "could not allocate enough memory for copy of video's filepath");
+  memcpy(VIDEO_PATH, filepath, strlen(filepath) + 1);
+  
   BLOCK_SZ = block_sz;
   {
     videoData video_data = get_video_information(filepath);
@@ -170,5 +172,5 @@ void play_video(const char * filepath, const size_t block_sz) {
 
   free_stbi(FRAME);
   if (DATA_PIPELINE) pclose(DATA_PIPELINE);
-  free(VIDEO);
+  free(VIDEO_PATH);
 }
