@@ -56,8 +56,8 @@ char * stbi_to_ascii(const ImageStbi * stbi, const size_t block_sz)
   size_t out_width = (stbi->width + block_sz - 1) / block_sz;
   size_t out_height = (stbi->height + block_sz - 1) / block_sz;
 
-  char * ascii_image = (char *)malloc(out_width * out_height + out_height + 1); // +height for "\n" and +1 for "\0" characters
-  if (!ascii_image) raise_critical_error(ERROR_RUNTIME, "Can not allocate enough memory for ascii_image [size in bytes: %zu]", out_width * out_height + out_height + 1);
+  char * art = (char *)malloc(out_width * out_height + out_height + 1); // +height for "\n" and +1 for "\0" characters
+  if (!art) raise_critical_error(ERROR_RUNTIME, "Can not allocate enough memory for art [size in bytes: %zu]", out_width * out_height + out_height + 1);
   size_t idx = 0;
 
   // iterate over each pixel
@@ -78,12 +78,12 @@ char * stbi_to_ascii(const ImageStbi * stbi, const size_t block_sz)
       }
 
       uint8_t grayscale_average = sum / count;
-      ascii_image[idx++] = grayscale_char(grayscale_average);
+      art[idx++] = grayscale_char(grayscale_average);
     }
-    ascii_image[idx++] = '\n';
+    art[idx++] = '\n';
   }
-  ascii_image[idx] = '\0';
-  return ascii_image;
+  art[idx] = '\0';
+  return art;
 }
 
 void print_image(const char * filepath, const size_t block_sz) 
@@ -95,9 +95,9 @@ void print_image(const char * filepath, const size_t block_sz)
   printf("Read image width:%zu Height:%zu ComponentsSize:%zu\n", stbi->width, stbi->height, stbi->n_components);
 
   printf("Converting image %s into ascii grayscale array\n", filepath);
-  char * ascii_image = stbi_to_ascii(stbi, block_sz);
+  char * art = stbi_to_ascii(stbi, block_sz);
   free_stbi(stbi);
 
-  printf("%s", ascii_image);
-  free(ascii_image);
+  printf("%s", art);
+  free(art);
 }
