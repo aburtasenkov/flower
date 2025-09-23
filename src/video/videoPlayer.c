@@ -157,7 +157,7 @@ void play_video(const char * filepath, const size_t block_sz) {
   VIDEO_PATH = (char *)malloc(strlen(filepath) + 1);
   if (!VIDEO_PATH) raise_critical_error(ERROR_RUNTIME, "could not allocate enough memory for copy of video's filepath");
   memcpy(VIDEO_PATH, filepath, strlen(filepath) + 1);
-  
+
   BLOCK_SZ = block_sz;
   {
     videoData video_data = get_video_information(filepath);
@@ -167,8 +167,6 @@ void play_video(const char * filepath, const size_t block_sz) {
   DATA_PIPELINE = open_ffmpeg_pipeline(filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
 
   main_loop();
-
-  // todo add handling for left and right arrows
 
   free_stbi(FRAME);
   if (DATA_PIPELINE) pclose(DATA_PIPELINE);
