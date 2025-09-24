@@ -148,8 +148,6 @@ void play_video(const char * filepath, const size_t block_sz) {
     if (ESCAPE_LOOP) break;
     if (PAUSE)
     {
-      pclose(video_player->data_pipeline);
-      video_player->data_pipeline = NULL;
       while (PAUSE && !ESCAPE_LOOP)
       {
         check_keypress();
@@ -167,8 +165,6 @@ void play_video(const char * filepath, const size_t block_sz) {
       }
 
       if (ESCAPE_LOOP) break;
-
-      video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
     }
 
     if (MOVE_RIGHT) 
