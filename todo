@@ -2,5 +2,4 @@
 -make conversion of ppms to video again
 -make padding be an input parameter
 
--fix terminal being stuck in rawmode
 -print binds only once at the bottom of frame and override from topleft corner
