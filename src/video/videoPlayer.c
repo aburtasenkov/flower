@@ -18,6 +18,8 @@
 #define NANOSECONDS_IN_SECOND 1e9
 #define SEEK_SECONDS 1
 
+#define SAFE_CLOSE_PIPE(ptr) do { pclose(ptr); ptr = NULL; } while (0)
+
 static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz) 
 {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
@@ -53,11 +55,7 @@ static void free_VideoPlayer(VideoPlayer * video_player)
   if (!video_player) raise_critical_error(ERROR_BAD_ARGUMENTS, "video_player is null pointer");
 
   if (video_player->filepath) free(video_player->filepath);
-  if (video_player->data_pipeline) 
-  {
-    pclose(video_player->data_pipeline);
-    video_player->data_pipeline = NULL;
-  }
+  if (video_player->data_pipeline) SAFE_CLOSE_PIPE(video_player->data_pipeline);
   if (video_player->frame) free_stbi(video_player->frame);
 
   free(video_player);
@@ -115,11 +113,7 @@ void seek_time(VideoPlayer * video_player, const double seconds)
   }
   else video_player->frame_count += frame_diff;
 
-  if (video_player->data_pipeline) 
-  {
-    pclose(video_player->data_pipeline);
-    video_player->data_pipeline = NULL;
-  }
+  if (video_player->data_pipeline) SAFE_CLOSE_PIPE(video_player->data_pipeline);
   video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
 
   size_t read_bytes = read_frame(video_player->data_pipeline, video_player->frame);
