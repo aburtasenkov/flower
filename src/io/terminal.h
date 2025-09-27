@@ -7,9 +7,9 @@
 
 // OS dependent command to clear the terminal
 #ifdef _WIN32
-#define ClearCommand  "cls"
+#define CLEAR_COMMAND  "cls"
 #else
-#define ClearCommand "clear"
+#define CLEAR_COMMAND "clear"
 #endif
 
 int execute_command(const char * command);
