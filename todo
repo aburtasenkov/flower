@@ -6,3 +6,10 @@ PPMs:
 Video Player:
   -make audio playback
   -add terminal colors
+  -abstract platform specific functions to make video player platform independent
+
+Image converter:
+  -add UTF-8 support to improve ascii rendering
+
+Keyboard controls:
+  -Encapsulate input handling
