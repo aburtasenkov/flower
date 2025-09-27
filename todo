@@ -1,5 +1,8 @@
--make padding between glyphs adjustable
--make conversion of ppms to video again
--make padding be an input parameter
+PPMs:
+  -make padding between glyphs adjustable
+  -make conversion of ppms to video again
+  -make padding be an input parameter
 
--print binds only once at the bottom of frame and override from topleft corner
+Video Player:
+  -make audio playback
+  -add terminal colors
