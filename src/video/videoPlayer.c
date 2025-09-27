@@ -140,6 +140,13 @@ void play_video(const char * filepath, const size_t block_sz) {
   VideoPlayer * video_player = create_VideoPlayer(filepath, block_sz);
   enable_raw_mode();
 
+  if (execute_command(CLEAR_COMMAND) != 0) 
+  {
+    disable_raw_mode();
+    free_VideoPlayer(video_player);
+    raise_critical_error(ERROR_RUNTIME, "Could not clean terminal");
+  }
+
   while (true) 
   {
     check_keypress();
