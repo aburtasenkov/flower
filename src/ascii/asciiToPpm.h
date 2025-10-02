@@ -5,10 +5,10 @@
 
 #define RGB_COLOR_CHANNELS 3
 
-static size_t count_rows(const char * ascii);
+static size_t count_rows(const char *);
 // return amount of y coordinates in ascii image format
 
-static size_t count_columns(const char * ascii);
+static size_t count_columns(const char *);
 // return amount of x coordinates in ascii image format
 
 typedef struct {
@@ -17,14 +17,14 @@ typedef struct {
     size_t y;
 } ImagePPM;
 
-static ImagePPM * create_ppm(const size_t x, const size_t y);
+static ImagePPM * create_ppm(const size_t, const size_t);
 // create object of ImagePPM class of size x * y
 
-void free_ppm(ImagePPM * ppm);
+void free_ppm(ImagePPM *);
 
-static void set_pixel(ImagePPM * ppm, const size_t x, const size_t y, const uint8_t rgb[RGB_COLOR_CHANNELS]);
+static void set_pixel(ImagePPM *, const size_t, const size_t, const uint8_t[RGB_COLOR_CHANNELS]);
 // set pixel at (x,y) to rgb value
 
-static ImagePPM * convert_ascii_to_ppm(const char * ascii, const size_t ascii_width, const size_t ascii_height);
+static ImagePPM * convert_ascii_to_ppm(const char *, const size_t, const size_t);
 
-ImagePPM * ascii_to_ppm(const char * ascii);
+ImagePPM * ascii_to_ppm(const char *);

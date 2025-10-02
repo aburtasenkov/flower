@@ -10,4 +10,4 @@ typedef struct {
 
 OPTIONS default_config();
 
-void parse_options(OPTIONS * config, const int argc, char * const * argv);
+void parse_options(OPTIONS *, const int, char * const *);

@@ -7,8 +7,8 @@ extern bool PAUSE;
 extern bool MOVE_LEFT;
 extern bool MOVE_RIGHT;
 
-int get_keypress();
+int get_keypress(void);
 // return current key pressed
 
-void check_keypress();
+void check_keypress(void);
 // set flags on key presses

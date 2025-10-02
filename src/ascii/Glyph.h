@@ -15,5 +15,5 @@ typedef struct {
 } Glyph;
 
 
-const uint8_t * glyph_rows(const char c);
+const uint8_t * glyph_rows(const char);
 // return binary rows of an ascii char for further image creation
