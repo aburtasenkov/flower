@@ -63,28 +63,12 @@ static void free_VideoPlayer(VideoPlayer * video_player)
   free(video_player);
 }
 
-static void sleep_frame_time_offset(VideoPlayer * video_player, const struct timespec * start, const struct timespec * end) 
-// sleep until the next frame should be displayed
-// start and end are the times of the current frame processing
-{
-  double frame_time = 1.0 / video_player->fps;
-  double elapsed_time = (end->tv_sec - start->tv_sec) + (end->tv_nsec - start->tv_nsec) / NANOSECONDS_IN_SECOND;
-  double sleep_time = frame_time - elapsed_time;
-
-  if (sleep_time > 0) {
-    struct timespec sleep_duration;
-    sleep_duration.tv_sec = (time_t)sleep_time;
-    sleep_duration.tv_nsec = (long)((sleep_time - sleep_duration.tv_sec) * NANOSECONDS_IN_SECOND);
-    nanosleep(&sleep_duration, NULL);
-  }
-}
-
 static void sleep_until_next_frame(VideoPlayer * video_player)
 // This function calculates the target wall-clock time for the next frame based on the
 // video's start time and current frame count. This prevents cumulative timing errors.
 {
   // total time that should've elapsed until the display of next frame
-  double target_elapsed_seconds = (double)(video_player->frame_count + 1) * video_player->fps;
+  double target_elapsed_seconds = (double)(video_player->frame_count + 1) / video_player->fps;
 
   // absolute wall-clock time for next frame's presentation
   struct timespec target_time;
@@ -101,6 +85,29 @@ static void sleep_until_next_frame(VideoPlayer * video_player)
   clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &target_time, NULL);
 }
 
+static void resync_video_start_time(VideoPlayer * video_player)
+// resynchronize video_start time after disrupting event like a seek
+// after seeking the video's start time is broken
+// this function calculates a new, virtual start_time in the past, such that the
+// current time correctly corresponds to the new frame_count
+{
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+
+  double current_offset_secs = (double)video_player->frame_count / video_player->fps;
+
+  // calculate new start time in the past
+  video_player->video_start_time.tv_sec = now.tv_sec - (time_t)current_offset_secs;
+  video_player->video_start_time.tv_nsec = now.tv_nsec - (long)((current_offset_secs - (time_t)current_offset_secs) * NANOSECONDS_IN_SECOND);
+  
+  // handle nanosecond underflow
+  if (video_player->video_start_time.tv_nsec < 0)
+  {
+    video_player->video_start_time.tv_sec--;
+    video_player->video_start_time.tv_nsec += (long)NANOSECONDS_IN_SECOND;
+  }
+}
+
 static void print_ui(VideoPlayer * video_player)
 {
   char * ascii_frame = stbi_to_ascii(video_player->frame, video_player->block_sz);
@@ -113,17 +120,12 @@ static void print_ui(VideoPlayer * video_player)
 
 static void print_frame(VideoPlayer * video_player)
 {
-  struct timespec frame_start, frame_end;
-  clock_gettime(CLOCK_MONOTONIC, &frame_start);
-
   print_ui(video_player);
 
-  clock_gettime(CLOCK_MONOTONIC, &frame_end);
-
-  sleep_frame_time_offset(video_player, &frame_start, &frame_end);
+  sleep_until_next_frame(video_player);
 }
 
-void seek_time(VideoPlayer * video_player, const double seconds)
+static void seek_time(VideoPlayer * video_player, const double seconds)
 // seek seconds backwards or forward
 // if current timestamp if smaller than amount of frames that are seeked back - go back to 0.0 seconds
 {
@@ -147,6 +149,8 @@ void seek_time(VideoPlayer * video_player, const double seconds)
     ESCAPE_LOOP = true;
     return;
   }
+
+  resync_video_start_time(video_player);
 
   print_ui(video_player);
 }
@@ -192,6 +196,8 @@ void play_video(const char * filepath, const size_t block_sz) {
       }
 
       if (ESCAPE_LOOP) break;
+
+      resync_video_start_time(video_player);
     }
 
     if (read_frame(video_player->data_pipeline, video_player->frame) != video_player->frame->data_sz) break;
