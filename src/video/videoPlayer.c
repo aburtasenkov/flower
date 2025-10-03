@@ -79,6 +79,28 @@ static void sleep_frame_time_offset(VideoPlayer * video_player, const struct tim
   }
 }
 
+static void sleep_until_next_frame(VideoPlayer * video_player)
+// This function calculates the target wall-clock time for the next frame based on the
+// video's start time and current frame count. This prevents cumulative timing errors.
+{
+  // total time that should've elapsed until the display of next frame
+  double target_elapsed_seconds = (double)(video_player->frame_count + 1) * video_player->fps;
+
+  // absolute wall-clock time for next frame's presentation
+  struct timespec target_time;
+  target_time.tv_sec = video_player->video_start_time.tv_sec + (time_t)target_elapsed_seconds;
+  target_time.tv_nsec = video_player->video_start_time.tv_nsec + (long)((target_elapsed_seconds - (time_t)target_elapsed_seconds) * NANOSECONDS_IN_SECOND);
+
+  // handle nanosecond overflow
+  if (target_time.tv_nsec >= NANOSECONDS_IN_SECOND)
+  {
+    target_time.tv_sec++;
+    target_time.tv_nsec -= (long)NANOSECONDS_IN_SECOND;
+  }
+
+  clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &target_time, NULL);
+}
+
 static void print_ui(VideoPlayer * video_player)
 {
   char * ascii_frame = stbi_to_ascii(video_player->frame, video_player->block_sz);
