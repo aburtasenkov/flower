@@ -11,6 +11,9 @@ typedef struct {
   size_t block_sz;
   double fps;
   ImageStbi * frame;
+  
+  // members for frame timing and seeking
+  struct timespec video_start_time;
   size_t frame_count;
 } VideoPlayer;
 

@@ -47,6 +47,8 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
 
   video_player->frame_count = 0;
 
+  /*not initializing video_start_time member, as it should be initialized right before the video's start*/
+
   return video_player;
 }
 
@@ -139,9 +141,10 @@ void play_video(const char * filepath, const size_t block_sz) {
     free_VideoPlayer(video_player);
     raise_critical_error(ERROR_RUNTIME, "Could not clean terminal");
   }
-  
+
   enable_raw_mode();
 
+  clock_gettime(CLOCK_MONOTONIC, &video_player->video_start_time);
   while (!ESCAPE_LOOP) 
   {
     check_keypress();
