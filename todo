@@ -13,3 +13,6 @@ Image converter:
 
 Keyboard controls:
   -Encapsulate input handling
+
+overall:
+  -remove static declarations from header files
