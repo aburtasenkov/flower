@@ -132,42 +132,21 @@ void play_video(const char * filepath, const size_t block_sz) {
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   VideoPlayer * video_player = create_VideoPlayer(filepath, block_sz);
-  enable_raw_mode();
-
+  
   if (execute_command(CLEAR_COMMAND) != 0) 
   {
     disable_raw_mode();
     free_VideoPlayer(video_player);
     raise_critical_error(ERROR_RUNTIME, "Could not clean terminal");
   }
+  
+  enable_raw_mode();
 
-  while (true) 
+  while (!ESCAPE_LOOP) 
   {
     check_keypress();
     
     // handle key presses
-    if (ESCAPE_LOOP) break;
-    if (PAUSE)
-    {
-      while (PAUSE && !ESCAPE_LOOP)
-      {
-        check_keypress();
-        if (MOVE_RIGHT) 
-        {
-          seek_time(video_player, SEEK_SECONDS);
-          MOVE_RIGHT = false;
-        }
-        if (MOVE_LEFT) 
-        {
-          seek_time(video_player, -SEEK_SECONDS);
-          MOVE_LEFT = false;
-        }
-        usleep(SLEEP_ON_PAUSE_TIME);
-      }
-
-      if (ESCAPE_LOOP) break;
-    }
-
     if (MOVE_RIGHT) 
     {
       seek_time(video_player, SEEK_SECONDS);
@@ -177,6 +156,17 @@ void play_video(const char * filepath, const size_t block_sz) {
     {
       seek_time(video_player, -SEEK_SECONDS);
       MOVE_LEFT = false;
+    }
+
+    if (PAUSE)
+    {
+      while (PAUSE && !ESCAPE_LOOP)
+      {
+        check_keypress();
+        usleep(SLEEP_ON_PAUSE_TIME);
+      }
+
+      if (ESCAPE_LOOP) break;
     }
 
     if (read_frame(video_player->data_pipeline, video_player->frame) != video_player->frame->data_sz) break;
