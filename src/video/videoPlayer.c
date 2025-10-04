@@ -20,6 +20,12 @@
 
 #define SAFE_CLOSE_PIPE(ptr) do { pclose(ptr); ptr = NULL; } while (0)
 
+typedef enum {
+  PLAYER_STATE_PLAYING,
+  PLAYER_STATE_PAUSED,
+  PLAYER_STATE_EXITING
+} PlayerState;
+
 static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz) 
 {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
@@ -125,9 +131,11 @@ static void print_frame(VideoPlayer * video_player)
   sleep_until_next_frame(video_player);
 }
 
-static void seek_time(VideoPlayer * video_player, UserInput * user_input, const double seconds)
+static bool seek_time(VideoPlayer * video_player, const double seconds)
 // seek seconds backwards or forward
 // if current timestamp if smaller than amount of frames that are seeked back - go back to 0.0 seconds
+// return true on successfull seek (accounts for seeking beyond the timeline)
+// return false on failed read of the new frame
 {
   int frame_diff = (int)(video_player->fps * seconds);
   printf("Seeking %d frames\n", frame_diff);
@@ -146,13 +154,74 @@ static void seek_time(VideoPlayer * video_player, UserInput * user_input, const 
   if (read_bytes != video_player->frame->data_sz)
   {
     raise_noncritical_error(ERROR_EXTERNAL, "End of video or failed seek");
-    user_input->escape = true;
-    return;
+    return false;
   }
 
   resync_video_start_time(video_player);
-
   print_ui(video_player);
+  return true;
+}
+
+static void update_state(VideoPlayer * video_player, UserInput * user_input, PlayerState * current_state)
+{
+  if (user_input->escape)
+  {
+    *current_state = PLAYER_STATE_EXITING;
+    return;
+  }
+
+  switch (*current_state)
+  {
+    case PLAYER_STATE_PLAYING:
+    {
+      if (user_input->space)
+      {
+        *current_state = PLAYER_STATE_PAUSED;
+        user_input->space = false;
+      }
+      else if (user_input->arrow_left)
+      {
+        if (!seek_time(video_player, -SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
+        else *current_state = PLAYER_STATE_PAUSED;
+        user_input->arrow_left = false;
+      }
+      else if (user_input->arrow_right)
+      {
+        if (!seek_time(video_player, SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
+        else *current_state = PLAYER_STATE_PAUSED;
+        user_input->arrow_right = false;
+      }
+      break;
+    }
+    case PLAYER_STATE_PAUSED:
+    {
+      if (user_input->space)
+      {
+        resync_video_start_time(video_player);
+        *current_state = PLAYER_STATE_PLAYING;
+        user_input->space = false;
+      }
+      else if (user_input->arrow_left)
+      {
+        if (!seek_time(video_player, -SEEK_SECONDS))
+        {
+          *current_state = PLAYER_STATE_EXITING;
+        }
+        user_input->arrow_left = false;
+      }
+      else if (user_input->arrow_right)
+      {
+        if (!seek_time(video_player, SEEK_SECONDS))
+        {
+          *current_state = PLAYER_STATE_EXITING;
+        }
+        user_input->arrow_right = false;
+      }
+      break;
+    }
+    case PLAYER_STATE_EXITING:
+      break;
+  }
 }
 
 void play_video(const char * filepath, const size_t block_sz) {
@@ -171,39 +240,36 @@ void play_video(const char * filepath, const size_t block_sz) {
 
   enable_raw_mode();
 
+  PlayerState current_state = PLAYER_STATE_PLAYING;
   clock_gettime(CLOCK_MONOTONIC, &video_player->video_start_time);
-  while (!user_input.escape) 
+  while (current_state != PLAYER_STATE_EXITING) 
   {
-    check_keypress(&user_input);
-    
-    // handle key presses
-    if (user_input.arrow_right) 
+    // perform actions for the current state
+    switch (current_state)
     {
-      seek_time(video_player, &user_input, SEEK_SECONDS);
-      user_input.arrow_right = false;
-    }
-    if (user_input.arrow_left) 
-    {
-      seek_time(video_player, &user_input, -SEEK_SECONDS);
-      user_input.arrow_left = false;
-    }
-
-    if (user_input.space)
-    {
-      while (user_input.space && !user_input.escape)
+      case PLAYER_STATE_PLAYING:
       {
-        check_keypress(&user_input);
-        usleep(SLEEP_ON_PAUSE_TIME);
+        if (read_frame(video_player->data_pipeline, video_player->frame) != video_player->frame->data_sz)
+        {
+          current_state = PLAYER_STATE_EXITING;
+        }
+        else
+        {
+          print_frame(video_player);
+          ++video_player->frame_count;
+        }
+        break;
       }
-
-      if (user_input.escape) break;
-
-      resync_video_start_time(video_player);
+      case PLAYER_STATE_PAUSED:
+        usleep(SLEEP_ON_PAUSE_TIME);
+        break;
+      case PLAYER_STATE_EXITING:
+        break;
     }
 
-    if (read_frame(video_player->data_pipeline, video_player->frame) != video_player->frame->data_sz) break;
-    print_frame(video_player);
-    ++video_player->frame_count;
+    // check for inputs and update state for the next loop iteration
+    check_keypress(&user_input);
+    update_state(video_player, &user_input, &current_state);
   }
 
   disable_raw_mode();
