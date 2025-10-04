@@ -2,13 +2,12 @@
 
 #include <stdbool.h>
 
-extern bool ESCAPE_LOOP;
-extern bool PAUSE;
-extern bool MOVE_LEFT;
-extern bool MOVE_RIGHT;
+typedef struct {
+  bool escape;
+  bool space;
+  bool arrow_left;
+  bool arrow_right;
+} UserInput;
 
-int get_keypress(void);
-// return current key pressed
-
-void check_keypress(void);
-// set flags on key presses
+void check_keypress(UserInput *);
+// set UserInput's members on keypresses to true

@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <unistd.h>
 
-bool ESCAPE_LOOP = false;
-bool PAUSE = false;
-bool MOVE_LEFT = false;
-bool MOVE_RIGHT = false;
+#define ESC_SEQ_LENGTH 3
+#define ESC_SEQ_FIRST 0
+#define ESC_SEQ_SECOND 1
 
-int get_keypress()
+#define ARROW_LEFT 'D'
+#define ARROW_RIGHT 'C'
+
+static int get_keypress(void)
 // return current key pressed
 {
   unsigned char ch;
@@ -16,39 +18,51 @@ int get_keypress()
   return -1;
 }
 
-void check_keypress()
-// set flags on key presses
+static void handle_arrow_keys(UserInput * user_input, char * seq)
+{
+  if (seq[ESC_SEQ_FIRST] == '[')
+  {
+    switch (seq[ESC_SEQ_SECOND])
+    {
+      case ARROW_LEFT:
+        user_input->arrow_left = true;
+        break;
+      case ARROW_RIGHT:
+        user_input->arrow_right = true;
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+void check_keypress(UserInput * user_input)
+// check current key pressed and set the corresponding member of user_input to true
 {
   int key = get_keypress();
   if (key == -1) return; 
 
-  if (key == ' ') // space to toggle pause
+  switch (key)
   {
-    PAUSE = !PAUSE;
-  }
-  else if (key == 'q') // quit
-  {
-    ESCAPE_LOOP = !ESCAPE_LOOP;
-  } 
-  else if (key == '\033') // arrow keys start with escape sequence
-  {
-    char seq[3];
-    if (read(STDIN_FILENO, &seq[0], 1) == 1 &&
-      read(STDIN_FILENO, &seq[1], 1) == 1) 
+    case ' ':
+      user_input->space = !user_input->space;
+      break;
+    
+    case 'q':
+      user_input->escape = !user_input->escape;
+      break;
+    
+    case '\033': // escape sequence
+    {
+      char seq[ESC_SEQ_LENGTH];
+      if (read(STDIN_FILENO, &seq[ESC_SEQ_FIRST], 1) == 1 &&
+        read(STDIN_FILENO, &seq[ESC_SEQ_SECOND], 1) == 1) 
       {
-      if (seq[0] == '[') 
-      {
-        if (seq[1] == 'D') 
-        {
-          // left arrow
-          MOVE_LEFT = true;
-        } 
-        else if (seq[1] == 'C') 
-        {
-          // right arrow
-          MOVE_RIGHT = true;
-        }
+        handle_arrow_keys(user_input, seq);
       }
+      break;
     }
+    default:
+      break;
   }
 }
