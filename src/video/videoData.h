@@ -14,12 +14,6 @@ typedef struct {
   double fps;
 } videoData;
 
-static videoDimensions get_video_resolution(const char *);
-// write video resolution into stbi->width and stbi->height using ffprobe
-
-static double get_video_fps(const char *);
-// get fps of a video using ffprobe
-
 videoData get_video_information(const char *);
 // get all infos needed about a video located at filepath
 
