@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 typedef struct {
-  bool escape;
+  bool lowercase_q;
   bool space;
   bool arrow_left;
   bool arrow_right;

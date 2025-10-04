@@ -45,11 +45,11 @@ void check_keypress(UserInput * user_input)
   switch (key)
   {
     case ' ':
-      user_input->space = !user_input->space;
+      user_input->space = true;
       break;
     
     case 'q':
-      user_input->escape = !user_input->escape;
+      user_input->lowercase_q = true;
       break;
     
     case '\033': // escape sequence

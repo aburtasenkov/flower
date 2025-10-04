@@ -164,7 +164,7 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 
 static void update_state(VideoPlayer * video_player, UserInput * user_input, PlayerState * current_state)
 {
-  if (user_input->escape)
+  if (user_input->lowercase_q)
   {
     *current_state = PLAYER_STATE_EXITING;
     return;
