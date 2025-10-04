@@ -1,5 +1,6 @@
 #pragma once
 
+#include "controls.h"
 #include "../image/ImageStbi.h"
 
 #include <time.h>
@@ -35,7 +36,7 @@ static void print_ui(VideoPlayer *);
 
 static void print_frame(VideoPlayer *);
 
-static void seek_time(VideoPlayer * video_player, const double seconds);
+static void seek_time(VideoPlayer * video_player, UserInput * user_input, const double seconds);
 // seek seconds backwards or forward
 // if current timestamp if smaller than amount of frames that are seeked back - go back to 0.0 seconds
 

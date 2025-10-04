@@ -125,7 +125,7 @@ static void print_frame(VideoPlayer * video_player)
   sleep_until_next_frame(video_player);
 }
 
-static void seek_time(VideoPlayer * video_player, const double seconds)
+static void seek_time(VideoPlayer * video_player, UserInput * user_input, const double seconds)
 // seek seconds backwards or forward
 // if current timestamp if smaller than amount of frames that are seeked back - go back to 0.0 seconds
 {
@@ -146,7 +146,7 @@ static void seek_time(VideoPlayer * video_player, const double seconds)
   if (read_bytes != video_player->frame->data_sz)
   {
     raise_noncritical_error(ERROR_EXTERNAL, "End of video or failed seek");
-    ESCAPE_LOOP = true;
+    user_input->escape = true;
     return;
   }
 
@@ -160,6 +160,7 @@ void play_video(const char * filepath, const size_t block_sz) {
   if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz must be >= 1");
 
   VideoPlayer * video_player = create_VideoPlayer(filepath, block_sz);
+  UserInput user_input = {0};
   
   if (execute_command(CLEAR_COMMAND) != 0) 
   {
@@ -171,31 +172,31 @@ void play_video(const char * filepath, const size_t block_sz) {
   enable_raw_mode();
 
   clock_gettime(CLOCK_MONOTONIC, &video_player->video_start_time);
-  while (!ESCAPE_LOOP) 
+  while (!user_input.escape) 
   {
-    check_keypress();
+    check_keypress(&user_input);
     
     // handle key presses
-    if (MOVE_RIGHT) 
+    if (user_input.arrow_right) 
     {
-      seek_time(video_player, SEEK_SECONDS);
-      MOVE_RIGHT = false;
+      seek_time(video_player, &user_input, SEEK_SECONDS);
+      user_input.arrow_right = false;
     }
-    if (MOVE_LEFT) 
+    if (user_input.arrow_left) 
     {
-      seek_time(video_player, -SEEK_SECONDS);
-      MOVE_LEFT = false;
+      seek_time(video_player, &user_input, -SEEK_SECONDS);
+      user_input.arrow_left = false;
     }
 
-    if (PAUSE)
+    if (user_input.space)
     {
-      while (PAUSE && !ESCAPE_LOOP)
+      while (user_input.space && !user_input.escape)
       {
-        check_keypress();
+        check_keypress(&user_input);
         usleep(SLEEP_ON_PAUSE_TIME);
       }
 
-      if (ESCAPE_LOOP) break;
+      if (user_input.escape) break;
 
       resync_video_start_time(video_player);
     }
