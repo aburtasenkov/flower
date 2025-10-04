@@ -10,10 +10,3 @@ Video Player:
 
 Image converter:
   -add UTF-8 support to improve ascii rendering
-
-Keyboard controls:
-  -Encapsulate input handling
-
-overall:
-  -remove static declarations from header files
-  -make seeking work when paused
