@@ -16,3 +16,4 @@ Keyboard controls:
 
 overall:
   -remove static declarations from header files
+  -make seeking work when paused
