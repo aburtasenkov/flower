@@ -9,11 +9,5 @@
 // a glyph is 8x8 bits and therefore
 #define GLYPH_MOST_SIGNIFICANT_BIT 0b10000000
 
-typedef struct { 
-  char c; 
-  uint8_t rows[GLYPH_H]; 
-} Glyph;
-
-
 const uint8_t * glyph_rows(const char);
 // return binary rows of an ascii char for further image creation

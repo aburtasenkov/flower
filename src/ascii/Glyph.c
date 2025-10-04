@@ -5,6 +5,12 @@
 
 #include <ctype.h>
 
+typedef struct { 
+    char c; 
+    uint8_t rows[GLYPH_H]; 
+  } Glyph;
+  
+
 // font data
 static const Glyph FONT[] = {
 {' ', {0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000}},

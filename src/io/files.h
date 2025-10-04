@@ -11,9 +11,3 @@ char * file_extension(const char *);
 void write_image(const char *, const char *, const size_t);
 // convert image at filepath to ascii and write the resulting image in output_path
 // if file format is not supported, function will cause an error
-
-static void write_ppm(const char *, const char *, const size_t);
-// convert image at filepath to ppm file
-
-static void write_txt(const char *, const char *, const size_t);
-// convert image at filepath to txt file
