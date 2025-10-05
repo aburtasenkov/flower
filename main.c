@@ -1,5 +1,5 @@
 #include "src/ascii/stbiToAscii.h"
-#include "src/video/videoPlayer.h"
+#include "src/videoPlayer/videoPlayer.h"
 #include "src/config/Config.h"
 #include "src/io/terminal.h"
 #include "src/error.h"
