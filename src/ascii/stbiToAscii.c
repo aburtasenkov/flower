@@ -9,14 +9,16 @@
 
 static char grayscale_ascii_map[UINT8_MAX + 1] = {0};
 
+static inline char compute_grayscale_char(const uint8_t grayscale);
+
 void init_grayscale_ascii_map()
 // create hash map for each value to avoid recalculating ascii characters with same grayscale value
 {
   for (size_t i = 0; i <= UINT8_MAX; ++i)
-    grayscale_ascii_map[i] = compute_grayscale_Char((uint8_t)i);
+    grayscale_ascii_map[i] = compute_grayscale_char((uint8_t)i);
 }
 
-static inline char compute_grayscale_Char(const uint8_t grayscale)
+static inline char compute_grayscale_char(const uint8_t grayscale)
 // map a value of 0-255 on to an array of grayscale characters and return the character
 {
   static const char ascii[] = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. ";
