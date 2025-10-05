@@ -57,34 +57,6 @@ char * file_extension(const char * filepath)
   return extension;
 }
 
-void write_image(const char * filepath, const char * output_path, const size_t block_sz)
-// convert image at filepath to ascii and write the resulting image in output_path
-// if file format is not supported, function will cause an error
-{
-  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (!output_path) raise_critical_error(ERROR_BAD_ARGUMENTS, "output_path is null pointer");
-  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz < 1 [block_sz: %zu]", block_sz);
-
-  char * extension = file_extension(output_path);
-
-  // check if output file format is supported
-  if (strcmp(extension, "ppm") == 0) 
-  {
-    free(extension);
-    write_ppm(filepath, output_path, block_sz);
-    return;
-  }
-  if (strcmp(extension, "txt") == 0) 
-  {
-    free(extension);
-    write_txt(filepath, output_path, block_sz);
-    return;
-  }
-
-  raise_critical_error(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
-  //didn't forget "free(extension);", its just not needed as raise_critical_error will stop control flow and OS will cleanup
-}
-
 static void write_ppm(const char * filepath, const char * output_path, const size_t block_sz)
 // convert image at filepath to ppm file
 {
@@ -133,4 +105,32 @@ static void write_txt(const char * filepath, const char * output_path, const siz
   }
   
   free(ascii_image);
+}
+
+void write_image(const char * filepath, const char * output_path, const size_t block_sz)
+// convert image at filepath to ascii and write the resulting image in output_path
+// if file format is not supported, function will cause an error
+{
+  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
+  if (!output_path) raise_critical_error(ERROR_BAD_ARGUMENTS, "output_path is null pointer");
+  if (block_sz < 1) raise_critical_error(ERROR_BAD_ARGUMENTS, "block_sz < 1 [block_sz: %zu]", block_sz);
+
+  char * extension = file_extension(output_path);
+
+  // check if output file format is supported
+  if (strcmp(extension, "ppm") == 0) 
+  {
+    free(extension);
+    write_ppm(filepath, output_path, block_sz);
+    return;
+  }
+  if (strcmp(extension, "txt") == 0) 
+  {
+    free(extension);
+    write_txt(filepath, output_path, block_sz);
+    return;
+  }
+  
+  free(extension);
+  raise_critical_error(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
 }
