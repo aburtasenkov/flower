@@ -42,7 +42,7 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
   }
   memcpy(video_player->filepath, filepath, strlen(filepath) + 1);
 
-  video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
+  video_player->data_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
   
   video_player->block_sz = block_sz;
   {
@@ -148,7 +148,7 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
   else video_player->frame_count += frame_diff;
 
   if (video_player->data_pipeline) SAFE_CLOSE_PIPE(video_player->data_pipeline);
-  video_player->data_pipeline = open_ffmpeg_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
+  video_player->data_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
 
   size_t read_bytes = read_frame(video_player->data_pipeline, video_player->frame);
   if (read_bytes != video_player->frame->data_sz)

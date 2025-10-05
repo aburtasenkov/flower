@@ -21,9 +21,11 @@ double calculate_timestamp(const size_t, const double);
 // return amount of seconds passed after current_frame shown frames
 // return is floor divisioned by TIMESTAMP_ROUNDING_PRECISION
 
-FILE * open_ffmpeg_pipeline(const char *, const double);
+FILE * open_ffmpeg_video_pipeline(const char *, const double);
 // open 3 bit ffpmeg frame pipeline 
 // each bit is a rgb channel
+
+FILE * open_ffmpeg_audio_pipeline(const char *, const double);
 
 ImageStbi * create_frame(const char *);
 // create stbi object to read rgb frames into

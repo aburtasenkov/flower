@@ -8,14 +8,17 @@
 #define FFPROBE_RESOLUTION_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0:s=x \"%s\""
 #define FFPROBE_FPS_COMMAND "ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of default=noprint_wrappers=1:nokey=1 \"%s\""
 
-#define FFMPEG_COMMAND "ffmpeg -loglevel quiet -ss %.3f -i \"%s\" -f rawvideo -pix_fmt rgb24 -"
+#define FFMPEG_VIDEO_COMMAND "ffmpeg -loglevel quiet -ss %.3f -i \"%s\" -f rawvideo -pix_fmt rgb24 -"
+#define FFMPEG_AUDIO_COMMAND "ffmpeg -loglevel quiet -ss %.3f -i \"%s\" -f s16le -ar 44100 -ac 2 -"
 
 #define TIMESTAMP_ROUNDING_PRECISION 3
+
+#define COMMAND_SZ 1024
 
 videoDimensions get_video_resolution(const char * filepath)
 // write video resolution into stbi->width and stbi->height using ffprobe
 {
-  char command[1024];
+  char command[COMMAND_SZ];
   char buffer[128];
   videoDimensions dimensions;
 
@@ -39,7 +42,7 @@ videoDimensions get_video_resolution(const char * filepath)
 double get_video_fps(const char * filepath)
 // get fps of a video using ffprobe
 {
-  char command [1024];
+  char command[COMMAND_SZ];
   char buffer[64];
   int num, denom;
   double fps = 0;
@@ -84,15 +87,26 @@ double calculate_timestamp(const size_t current_frame, const double video_fps)
   return round(seconds * factor) / factor;
 }
 
-FILE * open_ffmpeg_pipeline(const char * filepath, const double timestamp)
+FILE * open_ffmpeg_video_pipeline(const char * filepath, const double timestamp)
 // open 3 bit ffpmeg frame pipeline 
 // each bit is a rgb channel
 {
-  char command[1024];
-  snprintf(command, sizeof(command), FFMPEG_COMMAND, timestamp, filepath);
+  char command[COMMAND_SZ];
+  snprintf(command, sizeof(command), FFMPEG_VIDEO_COMMAND, timestamp, filepath);
 
   FILE * pipe = popen(command, "r");
-  if (!pipe) raise_critical_error(ERROR_RUNTIME, "popen failed running ffmpeg");
+  if (!pipe) raise_critical_error(ERROR_RUNTIME, "popen failed running ffmpeg vidoe command");
+
+  return pipe;
+}
+
+FILE * open_ffmpeg_audio_pipeline(const char * filepath, const double timestamp)
+{
+  char command[COMMAND_SZ];
+  snprintf(command, sizeof(command), FFMPEG_AUDIO_COMMAND, timestamp, filepath);
+  
+  FILE * pipe = popen(command, "r");
+  if (!pipe) raise_critical_error(ERROR_RUNTIME, "popen failed running ffmpeg audio command");
 
   return pipe;
 }
