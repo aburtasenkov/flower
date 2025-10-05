@@ -131,6 +131,6 @@ void write_image(const char * filepath, const char * output_path, const size_t b
     return;
   }
   
+  raise_noncritical_error(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
   free(extension);
-  raise_critical_error(ERROR_BAD_ARGUMENTS, "File format '%s' is not supported", extension);
 }
