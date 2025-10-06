@@ -42,7 +42,7 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
   }
   memcpy(video_player->filepath, filepath, strlen(filepath) + 1);
 
-  video_player->data_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
+  video_player->video_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, 0.0); // ffmpeg 3 byte image pipeline (R, G, B)
   
   video_player->block_sz = block_sz;
   {
@@ -63,7 +63,7 @@ static void free_VideoPlayer(VideoPlayer * video_player)
   if (!video_player) raise_critical_error(ERROR_BAD_ARGUMENTS, "video_player is null pointer");
 
   if (video_player->filepath) free(video_player->filepath);
-  if (video_player->data_pipeline) SAFE_CLOSE_PIPE(video_player->data_pipeline);
+  if (video_player->video_pipeline) SAFE_CLOSE_PIPE(video_player->video_pipeline);
   if (video_player->frame) free_stbi(video_player->frame);
 
   free(video_player);
@@ -147,10 +147,10 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
   }
   else video_player->frame_count += frame_diff;
 
-  if (video_player->data_pipeline) SAFE_CLOSE_PIPE(video_player->data_pipeline);
-  video_player->data_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
+  if (video_player->video_pipeline) SAFE_CLOSE_PIPE(video_player->video_pipeline);
+  video_player->video_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
 
-  size_t read_bytes = read_frame(video_player->data_pipeline, video_player->frame);
+  size_t read_bytes = read_frame(video_player->video_pipeline, video_player->frame);
   if (read_bytes != video_player->frame->data_sz)
   {
     raise_noncritical_error(ERROR_EXTERNAL, "End of video or failed seek");
@@ -249,7 +249,7 @@ void play_video(const char * filepath, const size_t block_sz) {
     {
       case PLAYER_STATE_PLAYING:
       {
-        if (read_frame(video_player->data_pipeline, video_player->frame) != video_player->frame->data_sz)
+        if (read_frame(video_player->video_pipeline, video_player->frame) != video_player->frame->data_sz)
         {
           current_state = PLAYER_STATE_EXITING;
         }

@@ -8,7 +8,7 @@
 
 typedef struct {
   char * filepath;
-  FILE * data_pipeline;
+  FILE * video_pipeline;
   size_t block_sz;
   double fps;
   ImageStbi * frame;
