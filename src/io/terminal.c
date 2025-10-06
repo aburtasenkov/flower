@@ -14,6 +14,7 @@ static int orig_fl;
 int execute_command(const char * command) 
 // Wrapper for system(*command*) calls in order to ease debugging
 {
+  if (!command) raise_critical_error(ERROR_BAD_ARGUMENTS, "command is null pointer");
   int status_code = system(command);
 
   // check if system failed
@@ -49,6 +50,7 @@ bool is_video(const char * file_extension) {
 }
 
 bool is_image(const char * file_extension) {
+  if (!file_extension) raise_critical_error(ERROR_BAD_ARGUMENTS, "file_extension is null pointer");
   static const char * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
   size_t sz = 11;  // size of ImageExtensionArray
 
