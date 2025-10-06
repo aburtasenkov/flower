@@ -26,6 +26,44 @@ typedef enum {
   PLAYER_STATE_EXITING
 } PlayerState;
 
+typedef enum {
+  AUDIO_PLAY = 0,
+  AUDIO_PAUSE = 1
+} AudioPlayerStatus;
+
+static void audio_callback(void * userdata, Uint8 * stream, int len)
+// callback function for SDL audio player to retrieve data from pipe
+{
+  FILE * audio_pipeline = (FILE *)userdata;
+
+  size_t bytes_read = fread(stream, 1, len, audio_pipeline);
+
+  // if end of stream -> fill the rest with silence
+  if (bytes_read < (size_t)len) SDL_memset(stream + bytes_read, 0, len - bytes_read);
+}
+
+static SDL_AudioSpec initialize_audio_player(VideoPlayer * video_player)
+{
+  SDL_Init(SDL_INIT_AUDIO);
+
+  SDL_AudioSpec desired_spec;
+
+  SDL_zero(desired_spec);
+  desired_spec.freq = 44100; // sample rate
+  desired_spec.format = AUDIO_S16LSB; // 16 bit signed audio
+  desired_spec.channels = 2; // stereo
+  desired_spec.samples = 4096; // buffer size
+  desired_spec.callback = audio_callback;
+  desired_spec.userdata = video_player->audio_pipeline;
+
+  return desired_spec;
+}
+
+static void toggle_audio_playback(VideoPlayer * video_player, AudioPlayerStatus status)
+{  
+  SDL_PauseAudioDevice(video_player->device, status);
+}
+
 static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz) 
 {
   if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
@@ -55,6 +93,13 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
 
   /*not initializing video_start_time member, as it should be initialized right before the video's start*/
 
+  // initialize members for audio playback
+  video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, 0.0);
+  video_player->desired_spec = initialize_audio_player(video_player);
+
+  video_player->device = SDL_OpenAudioDevice(NULL, 0, &video_player->desired_spec, NULL, 0);
+  if (video_player->device == 0) raise_critical_error(ERROR_RUNTIME, "SDL Error%s", SDL_GetError());
+
   return video_player;
 }
 
@@ -65,6 +110,11 @@ static void free_VideoPlayer(VideoPlayer * video_player)
   if (video_player->filepath) free(video_player->filepath);
   if (video_player->video_pipeline) SAFE_CLOSE_PIPE(video_player->video_pipeline);
   if (video_player->frame) free_stbi(video_player->frame);
+  
+  // close audio players members
+  if (video_player->audio_pipeline) SAFE_CLOSE_PIPE(video_player->audio_pipeline);
+  SDL_CloseAudioDevice(video_player->device);
+  SDL_Quit();
 
   free(video_player);
 }
@@ -137,6 +187,8 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 // return true on successfull seek (accounts for seeking beyond the timeline)
 // return false on failed read of the new frame
 {
+  toggle_audio_playback(video_player, AUDIO_PAUSE);
+
   int frame_diff = (int)(video_player->fps * seconds);
   printf("Seeking %d frames\n", frame_diff);
 
@@ -147,8 +199,15 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
   }
   else video_player->frame_count += frame_diff;
 
+  // reopen both pipelines at new timestamp
   if (video_player->video_pipeline) SAFE_CLOSE_PIPE(video_player->video_pipeline);
   video_player->video_pipeline = open_ffmpeg_video_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
+
+  if (video_player->audio_pipeline) SAFE_CLOSE_PIPE(video_player->audio_pipeline);
+  video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, calculate_timestamp(video_player->frame_count, video_player->fps));
+
+  // clear existing audio buffer
+  SDL_ClearQueuedAudio(video_player->device);
 
   size_t read_bytes = read_frame(video_player->video_pipeline, video_player->frame);
   if (read_bytes != video_player->frame->data_sz)
@@ -159,6 +218,7 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 
   resync_video_start_time(video_player);
   print_ui(video_player);
+
   return true;
 }
 
@@ -176,6 +236,7 @@ static void update_state(VideoPlayer * video_player, UserInput * user_input, Pla
     {
       if (user_input->space)
       {
+        toggle_audio_playback(video_player, AUDIO_PAUSE);
         *current_state = PLAYER_STATE_PAUSED;
         user_input->space = false;
       }
@@ -197,6 +258,7 @@ static void update_state(VideoPlayer * video_player, UserInput * user_input, Pla
     {
       if (user_input->space)
       {
+        toggle_audio_playback(video_player, AUDIO_PLAY);
         resync_video_start_time(video_player);
         *current_state = PLAYER_STATE_PLAYING;
         user_input->space = false;
@@ -242,6 +304,8 @@ void play_video(const char * filepath, const size_t block_sz) {
 
   PlayerState current_state = PLAYER_STATE_PLAYING;
   clock_gettime(CLOCK_MONOTONIC, &video_player->video_start_time);
+
+  toggle_audio_playback(video_player, AUDIO_PLAY);
   while (current_state != PLAYER_STATE_EXITING) 
   {
     // perform actions for the current state

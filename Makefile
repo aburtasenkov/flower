@@ -3,6 +3,10 @@ CC := gcc
 CFLAGS := -Wall -Wextra -O2 -Wno-unused-function
 LDFLAGS := -lm
 
+# Add SDL2 flags
+CFLAGS += $(shell sdl2-config --cflags)
+LDFLAGS += $(shell sdl2-config --libs)
+
 # Source files
 SRC_DIR := src
 SRC_FILES := $(shell find $(SRC_DIR) -type f -name "*.c")
