@@ -295,7 +295,6 @@ void play_video(const char * filepath, const size_t block_sz) {
   
   if (execute_command(CLEAR_COMMAND) != 0) 
   {
-    disable_raw_mode();
     free_VideoPlayer(video_player);
     raise_critical_error(ERROR_RUNTIME, "Could not clean terminal");
   }
