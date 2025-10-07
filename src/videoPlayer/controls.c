@@ -3,12 +3,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define ESC_SEQ_LENGTH 3
-#define ESC_SEQ_FIRST 0
-#define ESC_SEQ_SECOND 1
+#define ESCAPE_CHAR '\033'
+#define CONTROL_SEQUENCE_INTRODUCER '['
 
-#define ARROW_LEFT 'D'
-#define ARROW_RIGHT 'C'
+#define ESCAPE_SEQUENCE_ARROW_UP 'A'
+#define ESCAPE_SEQUENCE_ARROW_DOWN 'B'
+#define ESCAPE_SEQUENCE_ARROW_RIGHT 'C'
+#define ESCAPE_SEQUENCE_ARROW_LEFT 'D'
 
 static int get_keypress(void)
 // return current key pressed
@@ -20,18 +21,15 @@ static int get_keypress(void)
 
 static void handle_arrow_keys(UserInput * user_input, char * seq)
 {
-  if (seq[ESC_SEQ_FIRST] == '[')
+  if (seq[0] == CONTROL_SEQUENCE_INTRODUCER)
   {
-    switch (seq[ESC_SEQ_SECOND])
+    switch (seq[1])
     {
-      case ARROW_LEFT:
-        user_input->arrow_left = true;
-        break;
-      case ARROW_RIGHT:
-        user_input->arrow_right = true;
-        break;
-      default:
-        break;
+      case ESCAPE_SEQUENCE_ARROW_UP:    user_input->arrow_up = true; break;
+      case ESCAPE_SEQUENCE_ARROW_DOWN:  user_input->arrow_down = true; break;
+      case ESCAPE_SEQUENCE_ARROW_RIGHT: user_input->arrow_right = true; break;
+      case ESCAPE_SEQUENCE_ARROW_LEFT:  user_input->arrow_left = true; break;
+      default: break;
     }
   }
 }
@@ -45,18 +43,20 @@ void check_keypress(UserInput * user_input)
   switch (key)
   {
     case ' ':
+    {
       user_input->space = true;
       break;
-    
+    }
     case 'q':
+    {
       user_input->lowercase_q = true;
       break;
-    
-    case '\033': // escape sequence
+    }
+    case ESCAPE_CHAR:
     {
-      char seq[ESC_SEQ_LENGTH];
-      if (read(STDIN_FILENO, &seq[ESC_SEQ_FIRST], 1) == 1 &&
-        read(STDIN_FILENO, &seq[ESC_SEQ_SECOND], 1) == 1) 
+      char seq[2];
+      if (read(STDIN_FILENO, &seq[0], 1) == 1 &&
+        read(STDIN_FILENO, &seq[1], 1) == 1) 
       {
         handle_arrow_keys(user_input, seq);
       }

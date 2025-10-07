@@ -7,6 +7,8 @@ typedef struct {
   bool space;
   bool arrow_left;
   bool arrow_right;
+  bool arrow_up;
+  bool arrow_down;
 } UserInput;
 
 void check_keypress(UserInput *);
