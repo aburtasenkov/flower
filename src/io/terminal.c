@@ -51,11 +51,11 @@ bool is_video(const char * file_extension) {
 
 bool is_image(const char * file_extension) {
   if (!file_extension) raise_critical_error(ERROR_BAD_ARGUMENTS, "file_extension is null pointer");
-  static const char * ImageExtensionArray[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
-  size_t sz = 11;  // size of ImageExtensionArray
+  static const char * image_extension_arr[] = {"jpg", "jpeg", "png", "bmp", "psd", "tga", "gif", "hdr", "pic", "ppm", "pgm"};
+  size_t sz = 11;  // size of image_extension_arr
 
   for (size_t i = 0; i < sz; ++i) {
-    if (strcmp(file_extension, ImageExtensionArray[i]) == 0) return true;
+    if (strcmp(file_extension, image_extension_arr[i]) == 0) return true;
   }
 
   return false;
