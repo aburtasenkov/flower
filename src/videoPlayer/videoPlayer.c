@@ -34,18 +34,30 @@ typedef enum {
 static void audio_callback(void * userdata, Uint8 * stream, int len)
 // callback function for SDL audio player to retrieve data from pipe
 {
-  FILE * audio_pipeline = (FILE *)userdata;
+  VideoPlayer * video_player = (VideoPlayer *)userdata;
 
-  size_t bytes_read = fread(stream, 1, len, audio_pipeline);
+  size_t bytes_read = fread(stream, 1, len, video_player->audio_pipeline);
+
+  Sint16 * samples = (Sint16 *)stream;
+  size_t num_samples = bytes_read / sizeof(Sint16);
+
+  // adjust the volume according to the video_player's settings
+  for (size_t i = 0; i < num_samples; ++i)
+  {
+    Sint32 new_value = (Sint32)(samples[i] * video_player->volume);
+
+    if (new_value > SDL_MAX_SINT16) new_value = SDL_MAX_SINT16;
+    else if (new_value < SDL_MIN_SINT16) new_value = SDL_MIN_SINT16;
+
+    samples[i] = new_value;
+  }
 
   // if end of stream -> fill the rest with silence
   if (bytes_read < (size_t)len) SDL_memset(stream + bytes_read, 0, len - bytes_read);
 }
 
-static SDL_AudioSpec initialize_audio_player(VideoPlayer * video_player)
+static SDL_AudioSpec initial_audio_spec(VideoPlayer * video_player)
 {
-  SDL_Init(SDL_INIT_AUDIO);
-
   SDL_AudioSpec desired_spec;
 
   SDL_zero(desired_spec);
@@ -54,7 +66,7 @@ static SDL_AudioSpec initialize_audio_player(VideoPlayer * video_player)
   desired_spec.channels = 2; // stereo
   desired_spec.samples = 4096; // buffer size
   desired_spec.callback = audio_callback;
-  desired_spec.userdata = video_player->audio_pipeline;
+  desired_spec.userdata = video_player;
 
   return desired_spec;
 }
@@ -66,9 +78,6 @@ static void toggle_audio_playback(VideoPlayer * video_player, AudioPlayerStatus 
 
 static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz) 
 {
-  if (!filepath) raise_critical_error(ERROR_BAD_ARGUMENTS, "filepath is null pointer");
-  if (block_sz == 0) raise_critical_error(ERROR_BAD_ARGUMENTS, "block size is 0");
-
   VideoPlayer * video_player = (VideoPlayer *)malloc(sizeof(VideoPlayer));
   if (!video_player) raise_critical_error(ERROR_RUNTIME, "Could not allocate enough memory for object of class VideoPlayer");
 
@@ -93,20 +102,22 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
 
   /*not initializing video_start_time member, as it should be initialized right before the video's start*/
 
+  SDL_Init(SDL_INIT_AUDIO);
+
   // initialize members for audio playback
   video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, 0.0);
-  video_player->desired_spec = initialize_audio_player(video_player);
+  video_player->desired_spec = initial_audio_spec(video_player);
 
   video_player->device = SDL_OpenAudioDevice(NULL, 0, &video_player->desired_spec, NULL, 0);
   if (video_player->device == 0) raise_critical_error(ERROR_RUNTIME, "SDL Error%s", SDL_GetError());
+
+  video_player->volume = 0.5f;
 
   return video_player;
 }
 
 static void free_VideoPlayer(VideoPlayer * video_player)
 {
-  if (!video_player) raise_critical_error(ERROR_BAD_ARGUMENTS, "video_player is null pointer");
-
   if (video_player->filepath) free(video_player->filepath);
   if (video_player->video_pipeline) SAFE_CLOSE_PIPE(video_player->video_pipeline);
   if (video_player->frame) free_stbi(video_player->frame);

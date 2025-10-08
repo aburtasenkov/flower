@@ -23,6 +23,7 @@ typedef struct {
   SDL_AudioSpec desired_spec;
   SDL_AudioDeviceID device;
   FILE * audio_pipeline;
+  float volume;
 } VideoPlayer;
 
 void play_video(const char *, const size_t);
