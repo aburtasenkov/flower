@@ -98,18 +98,19 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
     video_player->frame = create_stbi(video_data.dimensions.width, video_data.dimensions.height, 3);
   }
 
-  video_player->frame_count = 0;
-
   /*not initializing video_start_time member, as it should be initialized right before the video's start*/
+
+  video_player->frame_count = 0;
 
   SDL_Init(SDL_INIT_AUDIO);
 
   // initialize members for audio playback
-  video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, 0.0);
   video_player->desired_spec = initial_audio_spec(video_player);
 
   video_player->device = SDL_OpenAudioDevice(NULL, 0, &video_player->desired_spec, NULL, 0);
   if (video_player->device == 0) raise_critical_error(ERROR_RUNTIME, "SDL Error%s", SDL_GetError());
+  
+  video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, 0.0);
 
   video_player->volume = 0.5f;
 
