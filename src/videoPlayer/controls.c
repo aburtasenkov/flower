@@ -49,12 +49,12 @@ void check_keypress(UserInput * user_input)
       user_input->key_space = true;
       break;
     }
-    case 'm':
+    case 'm': case 'M':
     {
       user_input->key_m = true;
       break;
     }
-    case 'q':
+    case 'q': case 'Q':
     {
       user_input->key_q = true;
       break;
