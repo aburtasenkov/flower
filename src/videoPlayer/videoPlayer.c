@@ -240,7 +240,7 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 static void update_state(VideoPlayer * video_player, UserInput * user_input, PlayerState * current_state)
 // update video player's state
 {
-  if (user_input->lowercase_m)
+  if (is_pressed(user_input, KEY_M))
   {
     // if not muted yet
     if (video_player->volume > 0)
@@ -253,80 +253,74 @@ static void update_state(VideoPlayer * video_player, UserInput * user_input, Pla
       video_player->volume = video_player->muted_volume;
       video_player->muted_volume = 0.0f;
     }
-    user_input->lowercase_m = false;
+    unpress_key(user_input, KEY_M);
   }
-  
-  if (user_input->lowercase_q)
+
+  if (is_pressed(user_input, KEY_Q))
   {
     *current_state = PLAYER_STATE_EXITING;
-    user_input->lowercase_q = false;
+    unpress_key(user_input, KEY_Q);
     return;
   }
 
-  if (user_input->arrow_up)
+  if (is_pressed(user_input, ARROW_UP))
   {
     float new_volume = video_player->volume + VOLUME_STEP;
     if (new_volume > 1) new_volume = 1;
     video_player->volume = new_volume;
-    user_input->arrow_up = false;
+    unpress_key(user_input, ARROW_UP);
   }
 
-  if (user_input->arrow_down)
+  if (is_pressed(user_input, ARROW_DOWN))
   {
     float new_volume = video_player->volume - VOLUME_STEP;
     if (new_volume < 0) new_volume = 0;
     video_player->volume = new_volume;
-    user_input->arrow_down = false;
+    unpress_key(user_input, ARROW_DOWN);
   }
 
   switch (*current_state)
   {
     case PLAYER_STATE_PLAYING:
     {
-      if (user_input->space)
+      if (is_pressed(user_input, KEY_SPACE))
       {
         toggle_audio_playback(video_player, AUDIO_PAUSE);
         *current_state = PLAYER_STATE_PAUSED;
-        user_input->space = false;
+        unpress_key(user_input, KEY_SPACE);
       }
-      else if (user_input->arrow_left)
+      else if (is_pressed(user_input, ARROW_LEFT))
       {
         if (!seek_time(video_player, -SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
         else *current_state = PLAYER_STATE_PAUSED;
-        user_input->arrow_left = false;
+        unpress_key(user_input, ARROW_LEFT);
       }
-      else if (user_input->arrow_right)
+      else if (is_pressed(user_input, ARROW_RIGHT))
       {
         if (!seek_time(video_player, SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
         else *current_state = PLAYER_STATE_PAUSED;
-        user_input->arrow_right = false;
+        unpress_key(user_input, ARROW_RIGHT);
       }
       break;
     }
     case PLAYER_STATE_PAUSED:
     {
-      if (user_input->space)
+      if (is_pressed(user_input, KEY_SPACE))
       {
         toggle_audio_playback(video_player, AUDIO_PLAY);
         resync_video_start_time(video_player);
         *current_state = PLAYER_STATE_PLAYING;
-        user_input->space = false;
+        unpress_key(user_input, KEY_SPACE);
       }
-      else if (user_input->arrow_left)
+      else if (is_pressed(user_input, ARROW_LEFT))
       {
-        if (!seek_time(video_player, -SEEK_SECONDS))
-        {
-          *current_state = PLAYER_STATE_EXITING;
-        }
-        user_input->arrow_left = false;
+        if (!seek_time(video_player, -SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
+        unpress_key(user_input, ARROW_LEFT);
       }
-      else if (user_input->arrow_right)
+      else if (is_pressed(user_input, ARROW_RIGHT))
       {
-        if (!seek_time(video_player, SEEK_SECONDS))
-        {
-          *current_state = PLAYER_STATE_EXITING;
-        }
-        user_input->arrow_right = false;
+        if (!seek_time(video_player, SEEK_SECONDS)) *current_state = PLAYER_STATE_EXITING;
+        unpress_key(user_input, ARROW_RIGHT);
       }
       break;
     }
