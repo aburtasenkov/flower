@@ -47,6 +47,11 @@ void check_keypress(UserInput * user_input)
       user_input->space = true;
       break;
     }
+    case 'm':
+    {
+      user_input->lowercase_m = true;
+      break;
+    }
     case 'q':
     {
       user_input->lowercase_q = true;

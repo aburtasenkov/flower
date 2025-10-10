@@ -24,6 +24,7 @@ typedef struct {
   SDL_AudioDeviceID device;
   FILE * audio_pipeline;
   float volume;
+  float muted_volume;
 } VideoPlayer;
 
 void play_video(const char *, const size_t);

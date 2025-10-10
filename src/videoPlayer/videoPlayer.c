@@ -115,6 +115,7 @@ static VideoPlayer * create_VideoPlayer(const char * filepath, size_t block_sz)
   video_player->audio_pipeline = open_ffmpeg_audio_pipeline(video_player->filepath, 0.0);
 
   video_player->volume = 0.5f;
+  video_player->muted_volume = 0.0f;
 
   return video_player;
 }
@@ -239,6 +240,22 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 static void update_state(VideoPlayer * video_player, UserInput * user_input, PlayerState * current_state)
 // update video player's state
 {
+  if (user_input->lowercase_m)
+  {
+    // if not muted yet
+    if (video_player->volume > 0)
+    {
+      video_player->muted_volume = video_player->volume;
+      video_player->volume = 0.0f;
+    }
+    else
+    {
+      video_player->volume = video_player->muted_volume;
+      video_player->muted_volume = 0.0f;
+    }
+    user_input->lowercase_m = false;
+  }
+  
   if (user_input->lowercase_q)
   {
     *current_state = PLAYER_STATE_EXITING;
