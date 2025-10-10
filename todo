@@ -4,7 +4,6 @@ PPMs:
   -make padding be an input parameter
 
 Video Player:
-  -make audio playback
   -add terminal colors
   -abstract platform specific functions to make video player platform independent
 
