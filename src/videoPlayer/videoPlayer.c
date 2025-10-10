@@ -18,6 +18,8 @@
 #define NANOSECONDS_IN_SECOND 1e9
 #define SEEK_SECONDS 1
 
+#define VOLUME_STEP 0.1
+
 #define SAFE_CLOSE_PIPE(ptr) do { pclose(ptr); ptr = NULL; } while (0)
 
 typedef enum {
@@ -235,11 +237,29 @@ static bool seek_time(VideoPlayer * video_player, const double seconds)
 }
 
 static void update_state(VideoPlayer * video_player, UserInput * user_input, PlayerState * current_state)
+// update video player's state
 {
   if (user_input->lowercase_q)
   {
     *current_state = PLAYER_STATE_EXITING;
+    user_input->lowercase_q = false;
     return;
+  }
+
+  if (user_input->arrow_up)
+  {
+    float new_volume = video_player->volume + VOLUME_STEP;
+    if (new_volume > 1) new_volume = 1;
+    video_player->volume = new_volume;
+    user_input->arrow_up = false;
+  }
+
+  if (user_input->arrow_down)
+  {
+    float new_volume = video_player->volume - VOLUME_STEP;
+    if (new_volume < 0) new_volume = 0;
+    video_player->volume = new_volume;
+    user_input->arrow_down = false;
   }
 
   switch (*current_state)
