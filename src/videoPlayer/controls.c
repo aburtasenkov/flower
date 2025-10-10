@@ -44,21 +44,9 @@ void check_keypress(UserInput * user_input)
 
   switch (key)
   {
-    case ' ':
-    {
-      user_input->key_space = true;
-      break;
-    }
-    case 'm': case 'M':
-    {
-      user_input->key_m = true;
-      break;
-    }
-    case 'q': case 'Q':
-    {
-      user_input->key_q = true;
-      break;
-    }
+    case ' ':           user_input->key_space = true; break;
+    case 'm': case 'M': user_input->key_m = true; break;
+    case 'q': case 'Q': user_input->key_q = true; break;
     case ESCAPE_CHAR:
     {
       char seq[2];
@@ -79,45 +67,14 @@ void unpress_key(UserInput * user_input, KeyboardKey key)
 {
   switch (key)
   {
-    case KEY_M:
-    {
-      user_input->key_m = false;
-      break;
-    }
-    case KEY_Q:
-    {
-      user_input->key_q = false;
-      break;
-    }
-    case KEY_SPACE:
-    {
-      user_input->key_space = false;
-      break;
-    }
-    case ARROW_UP:
-    {
-      user_input->arrow_up = false;
-      break;
-    }
-    case ARROW_DOWN:
-    {
-      user_input->arrow_down = false;
-      break;
-    }
-    case ARROW_RIGHT:
-    {
-      user_input->arrow_right = false;
-      break;
-    }
-    case ARROW_LEFT:
-    {
-      user_input->arrow_left = false;
-      break;
-    }
-    default:
-    {
-      raise_noncritical_error(ERROR_BAD_ARGUMENTS, "Unknown key");
-    }
+    case KEY_M:       user_input->key_m = false; break;
+    case KEY_Q:       user_input->key_q = false; break;
+    case KEY_SPACE:   user_input->key_space = false; break;
+    case ARROW_UP:    user_input->arrow_up = false; break;
+    case ARROW_DOWN:  user_input->arrow_down = false; break;
+    case ARROW_RIGHT: user_input->arrow_right = false; break;
+    case ARROW_LEFT:  user_input->arrow_left = false; break;
+    default:          raise_noncritical_error(ERROR_BAD_ARGUMENTS, "Unknown key"); break;
   }
 }
 
